@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#111111">
+  <title>Noot-vir-Noot</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #111111;
+      --surface:   #1e1e1e;
+      --idle:      #242424;
+      --idle-fg:   #444444;
+      --a-col:     #2ecc71;
+      --b-col:     #3498db;
+      --c-col:     #9b59b6;
+      --d-col:     #e67e22;
+      --good:      #2ecc71;
+      --warn:      #f39c12;
+      --danger:    #e74c3c;
+      --accent:    #f0c040;
+    }
+
+    html, body {
+      height: 100%; width: 100%;
+      background: var(--bg);
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* ── SETUP SCREEN ─────────────────────────────────────── */
+    #setup {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      gap: 18px;
+      padding: 28px 24px;
+    }
+
+    .setup-logo {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .setup-hint {
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+      max-width: 260px;
+      line-height: 1.5;
+    }
+
+    .picker-row {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .pick-btn {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      border: 2px solid #333;
+      background: #1e1e1e;
+      color: #fff;
+      font-size: 28px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .12s;
+    }
+    .pick-btn:active { background: #333; }
+
+    .table-num {
+      font-size: 80px;
+      font-weight: 800;
+      min-width: 110px;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .pick-label {
+      font-size: 14px;
+      color: #777;
+    }
+
+    .go-btn {
+      width: 100%; max-width: 280px;
+      height: 58px;
+      border-radius: 14px;
+      border: none;
+      background: #1f6feb;
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: background .12s;
+    }
+    .go-btn:active { background: #388bfd; }
+
+    /* ── GAME SCREEN ──────────────────────────────────────── */
+    #game {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      padding: 8px;
+      gap: 7px;
+    }
+
+    /* Status bar */
+    .bar {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 7px 12px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      background: var(--danger);
+      flex-shrink: 0;
+      transition: background .3s;
+    }
+    .dot.ok   { background: var(--good); }
+    .dot.wait { background: var(--warn); }
+
+    .bar-text {
+      flex: 1;
+      font-size: 12px;
+      color: #999;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .t-badge {
+      background: #2a2a2a;
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .t-badge:active { background: #333; }
+
+    /* Button grid */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 7px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .abtn {
+      border-radius: 18px;
+      border: 3px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform .08s, box-shadow .2s, background .2s, border-color .2s, opacity .2s;
+      position: relative;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .abtn:active { transform: scale(0.94); }
+
+    .abtn-letter {
+      font-size: clamp(52px, 14vw, 88px);
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    /* States */
+    .abtn.idle {
+      background: var(--idle);
+      color: var(--idle-fg);
+      pointer-events: none;
+    }
+
+    /* Armed — colour-tinted dark background + coloured border */
+    .abtn.armed { pointer-events: auto; color: #fff; }
+    .abtn.armed.a { background: #152b1e; border-color: var(--a-col); }
+    .abtn.armed.b { background: #152030; border-color: var(--b-col); }
+    .abtn.armed.c { background: #1e1530; border-color: var(--c-col); }
+    .abtn.armed.d { background: #2b1e10; border-color: var(--d-col); }
+
+    /* Pressed (the one you chose) */
+    .abtn.chosen { pointer-events: none; }
+    .abtn.chosen.a { background: var(--a-col); color: #000; border-color: var(--a-col); }
+    .abtn.chosen.b { background: var(--b-col); color: #fff; border-color: var(--b-col); }
+    .abtn.chosen.c { background: var(--c-col); color: #fff; border-color: var(--c-col); }
+    .abtn.chosen.d { background: var(--d-col); color: #000; border-color: var(--d-col); }
+
+    /* The others after you answered */
+    .abtn.dim { background: var(--idle); color: var(--idle-fg); border-color: transparent; pointer-events: none; opacity: .45; }
+
+    /* LED glow overlay */
+    .led-glow {
+      position: absolute; inset: 0;
+      border-radius: 15px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s;
+    }
+    .glow-r { background: rgba(255, 60, 60, .22); }
+    .glow-g { background: rgba(60, 255, 100, .18); }
+    .glow-b { background: rgba(60, 120, 255, .22); }
+
+    /* Message strip */
+    .msg {
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 11px 16px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .msg-main { font-size: 15px; font-weight: 700; }
+    .msg-sub  { font-size: 11px; color: #555; margin-top: 3px; }
+
+    .back-hint {
+      font-size: 10px;
+      color: #333;
+      text-align: center;
+      padding-bottom: 1px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════ SETUP ══════════════════ -->
+<div id="setup">
+  <div class="setup-logo">Noot-vir-Noot</div>
+  <div class="setup-hint">Pick your table number then tap Connect.</div>
+
+  <div class="picker-row">
+    <button class="pick-btn" id="dec">−</button>
+    <div class="table-num" id="tnum">1</div>
+    <button class="pick-btn" id="inc">+</button>
+  </div>
+  <div class="pick-label" id="pick-lbl">Table 1</div>
+
+  <button class="go-btn" id="go-btn">CONNECT</button>
+</div>
+
+<!-- ══════════════════ GAME ═══════════════════ -->
+<div id="game">
+  <div class="bar">
+    <div class="dot" id="dot"></div>
+    <div class="bar-text" id="bar-text">Connecting…</div>
+    <div class="t-badge" id="t-badge">T1</div>
+  </div>
+
+  <div class="grid">
+    <button class="abtn idle a" id="bA">
+      <div class="led-glow" id="gA"></div>
+      <div class="abtn-letter">A</div>
+    </button>
+    <button class="abtn idle b" id="bB">
+      <div class="led-glow" id="gB"></div>
+      <div class="abtn-letter">B</div>
+    </button>
+    <button class="abtn idle c" id="bC">
+      <div class="led-glow" id="gC"></div>
+      <div class="abtn-letter">C</div>
+    </button>
+    <button class="abtn idle d" id="bD">
+      <div class="led-glow" id="gD"></div>
+      <div class="abtn-letter">D</div>
+    </button>
+  </div>
+
+  <div class="msg">
+    <div class="msg-main" id="msg-main">Waiting for question…</div>
+    <div class="msg-sub"  id="msg-sub"></div>
+  </div>
+  <div class="back-hint">Tap T# to change table</div>
+</div>
+
+<script>
+/* ── Constants ───────────────────────────────────────────── */
+const WS_PORT  = 8083;
+const MAX_TBL  = 12;
+const LETTERS  = ['A','B','C','D'];
+
+/* ── State ───────────────────────────────────────────────── */
+let tableNum  = Math.max(1, Math.min(MAX_TBL, parseInt(localStorage.getItem('noot_table') || '1', 10)));
+let phase     = 'idle';   // idle | armed | answered
+let ws        = null;
+let retryTmr  = null;
+
+/* ── DOM ─────────────────────────────────────────────────── */
+const $  = id => document.getElementById(id);
+const setup  = $('setup');
+const game   = $('game');
+const tnumEl = $('tnum');
+const pickLbl= $('pick-lbl');
+const tBadge = $('t-badge');
+const dot    = $('dot');
+const barTxt = $('bar-text');
+const msgMain= $('msg-main');
+const msgSub = $('msg-sub');
+
+const btn = {}, glow = {};
+LETTERS.forEach(l => { btn[l] = $('b'+l); glow[l] = $('g'+l); });
+
+/* ── Setup screen ────────────────────────────────────────── */
+tnumEl.textContent = tableNum;
+pickLbl.textContent = 'Table ' + tableNum;
+
+$('dec').addEventListener('click', () => {
+  tableNum = tableNum > 1 ? tableNum - 1 : MAX_TBL;
+  tnumEl.textContent = tableNum;
+  pickLbl.textContent = 'Table ' + tableNum;
+});
+$('inc').addEventListener('click', () => {
+  tableNum = tableNum < MAX_TBL ? tableNum + 1 : 1;
+  tnumEl.textContent = tableNum;
+  pickLbl.textContent = 'Table ' + tableNum;
+});
+$('go-btn').addEventListener('click', () => {
+  localStorage.setItem('noot_table', tableNum);
+  enterGame();
+});
+
+/* tap badge → back to setup */
+tBadge.addEventListener('click', () => {
+  if (ws) { try { ws.close(); } catch(e){} ws = null; }
+  if (retryTmr) { clearTimeout(retryTmr); retryTmr = null; }
+  game.style.display = 'none';
+  setup.style.display = 'flex';
+});
+
+/* ── Game screen ─────────────────────────────────────────── */
+function enterGame() {
+  setup.style.display = 'none';
+  game.style.display = 'flex';
+  tBadge.textContent = 'T' + tableNum;
+  resetBtns();
+  connect();
+}
+
+function setMsg(main, sub) {
+  msgMain.textContent = main;
+  msgSub.textContent  = sub || '';
+}
+
+function resetBtns() {
+  phase = 'idle';
+  LETTERS.forEach(l => {
+    btn[l].className = 'abtn idle ' + l.toLowerCase();
+    btn[l].onclick = null;
+  });
+  clearGlows();
+  setMsg('Waiting for question…', '');
+}
+
+function armBtns() {
+  phase = 'armed';
+  LETTERS.forEach(l => {
+    btn[l].className = 'abtn armed ' + l.toLowerCase();
+    btn[l].onclick = () => press(l);
+  });
+  setMsg('READY — tap your answer!', 'A  B  C  D');
+}
+
+function press(letter) {
+  if (phase !== 'armed') return;
+  phase = 'answered';
+  LETTERS.forEach(l => {
+    btn[l].className = 'abtn ' + (l === letter ? 'chosen' : 'dim') + ' ' + l.toLowerCase();
+    btn[l].onclick = null;
+  });
+  setMsg('Answer sent!', 'You chose ' + letter);
+  send({ type: 'button', sn: tableNum, button: letter });
+}
+
+/* ── LED glows ───────────────────────────────────────────── */
+function clearGlows() {
+  LETTERS.forEach(l => { glow[l].className = 'led-glow'; glow[l].style.opacity = '0'; });
+}
+
+function applyLed(target, r, g, b) {
+  const cls   = r > 0 ? 'glow-r' : g > 0 ? 'glow-g' : b > 0 ? 'glow-b' : null;
+  const tgts  = target === 'X' ? LETTERS : (LETTERS.includes(target) ? [target] : []);
+  tgts.forEach(l => {
+    if (cls) {
+      glow[l].className = 'led-glow ' + cls;
+      glow[l].style.opacity = '1';
+    } else {
+      glow[l].style.opacity = '0';
+    }
+  });
+}
+
+/* ── WebSocket ───────────────────────────────────────────── */
+function connect() {
+  if (ws) { try { ws.close(); } catch(e){} }
+  const url = 'ws://' + location.hostname + ':' + WS_PORT;
+  setConn('wait', 'Connecting…');
+  ws = new WebSocket(url);
+
+  ws.onopen = () => {
+    setConn('ok', 'Connected · T' + tableNum);
+    /* If we reconnected mid-round, a round_start will re-sync us.
+       For now just stay in whatever phase we were in. */
+  };
+
+  ws.onmessage = evt => {
+    let d; try { d = JSON.parse(evt.data); } catch(e) { return; }
+    switch (d.type) {
+      case 'ready':
+        armBtns();
+        break;
+      case 'round_start':
+        resetBtns();
+        break;
+      case 'accepted':
+        /* already showing chosen state */
+        break;
+      case 'rejected':
+        /* server says table already answered (e.g. page refresh mid-round) */
+        if (phase !== 'answered') {
+          phase = 'answered';
+          LETTERS.forEach(l => {
+            btn[l].className = 'abtn dim ' + l.toLowerCase();
+            btn[l].onclick = null;
+          });
+          setMsg('Already answered this round', '');
+        }
+        break;
+      case 'led':
+        applyLed(d.target, d.r, d.g, d.b);
+        break;
+    }
+  };
+
+  ws.onclose = () => {
+    setConn('err', 'Disconnected — retrying…');
+    retryTmr = setTimeout(connect, 3000);
+  };
+
+  ws.onerror = () => setConn('err', 'Connection error');
+}
+
+function setConn(state, text) {
+  barTxt.textContent = text;
+  dot.className = 'dot' + (state === 'ok' ? ' ok' : state === 'wait' ? ' wait' : '');
+}
+
+function send(obj) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
+}
+
+/* ── Auto-enter game if already configured ───────────────── */
+if (localStorage.getItem('noot_table')) enterGame();
+</script>
+</body>
+</html>

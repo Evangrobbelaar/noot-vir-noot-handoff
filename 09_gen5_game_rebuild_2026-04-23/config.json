@@ -1,0 +1,21 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8080
+  },
+  "leaderboard_ipc": {
+    "host": "127.0.0.1",
+    "port": 8081
+  },
+  "gameshow": {
+    "video_folder": "vid",
+    "access_code": "00000",
+    "toggle_key": "l"
+  },
+  "game": {
+    "max_tables": 12,
+    "correct_points": 100,
+    "incorrect_points": -50,
+    "dance_lights_interval_ms": 1000
+  }
+}

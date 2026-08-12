@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Gameshow Test Report — 2026-04-20 13:34:04</title>
+<style>
+  body { font-family: Segoe UI, Arial, sans-serif; background:#f5f5f5; padding:20px }
+  h1   { color:#333 }
+  .summary { background:#333; color:#fff; padding:14px 20px; border-radius:6px;
+              display:inline-block; margin-bottom:20px }
+  .summary span { font-size:1.4em; font-weight:bold; color:#ffc107 }
+  table { border-collapse:collapse; width:100%; background:#fff;
+           box-shadow:0 1px 4px rgba(0,0,0,.15) }
+  th    { background:#343a40; color:#fff; padding:8px 10px; text-align:left }
+  td    { padding:6px 10px; border-bottom:1px solid #ddd; vertical-align:top }
+  tr:hover { filter:brightness(0.97) }
+</style>
+</head>
+<body>
+<h1>Gameshow Integration Test Report</h1>
+<div class="summary">
+  2026-04-20 13:34:04 &nbsp;|&nbsp;
+  Server: 127.0.0.1:8080 &nbsp;|&nbsp;
+  <span>30/36 passed (83.3%)</span>
+</div>
+<table>
+<tr>
+  <th>Category</th><th>Test</th><th>Result</th>
+  <th>Duration</th><th>Metrics</th><th>Error</th><th>Notes</th>
+</tr>
+
+        <tr style="background:#d4edda">
+          <td>Connection</td>
+          <td>TCP connect + handshake</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">20 ms</td>
+          <td style="font-size:0.85em;color:#555">connect_ms: 20.0</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Connection</td>
+          <td>12 simultaneous connections</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">535 ms</td>
+          <td style="font-size:0.85em;color:#555">connected: 12<br>failed: 0</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Connection</td>
+          <td>Clean disconnect</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Connection</td>
+          <td>Wrong port rejected</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">2013 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">Connection to wrong port should be refused</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>DASHBOARD-READY-TRIGGER broadcasts READY to all clients</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">received_by: [1, 2, 3, 4]</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>Colour sequence — RED sent to all clients after READY</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">500 ms</td>
+          <td style="font-size:0.85em;color:#555">received_by: [1, 2, 3, 4]</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">Full sequence is RED(0s)→READY+GREEN(5s)→BLUE(15s)→OFF(20s)</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>awns_A accepted by server</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>awns_B accepted by server</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>awns_C accepted by server</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>awns_D accepted by server</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>Table 1 answer forwarded to leaderboard pipe</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">message: @1:A</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>Table 2 answer forwarded to leaderboard pipe</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">message: @2:A</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>Table 3 answer forwarded to leaderboard pipe</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">message: @3:A</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>Table 4 answer forwarded to leaderboard pipe</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">message: @4:A</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>Invalid answer (@1:X) NOT forwarded to leaderboard</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">300 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">Server should log invalid format but not forward</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Protocol</td>
+          <td>PING accepted without crash</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>GameSim</td>
+          <td>Gameshow client connects</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">17 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>GameSim</td>
+          <td>All 12 table clients connect</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">16 ms</td>
+          <td style="font-size:0.85em;color:#555">avg_ms: 10.2<br>max_ms: 15.5</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#f8d7da">
+          <td>GameSim</td>
+          <td>Round 1 — READY + 12 answers processed</td>
+          <td style="color:#721c24;font-weight:bold;text-align:center">✗</td>
+          <td style="text-align:right">4201 ms</td>
+          <td style="font-size:0.85em;color:#555">pipe_hits: 5<br>correct_tables: 2</td>
+          <td style="font-size:0.85em;color:#c00">pipe_hits=5/12, ready=True</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#f8d7da">
+          <td>GameSim</td>
+          <td>Round 2 — READY + 12 answers processed</td>
+          <td style="color:#721c24;font-weight:bold;text-align:center">✗</td>
+          <td style="text-align:right">2571 ms</td>
+          <td style="font-size:0.85em;color:#555">pipe_hits: 8<br>correct_tables: 3</td>
+          <td style="font-size:0.85em;color:#c00">pipe_hits=8/12, ready=True</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#f8d7da">
+          <td>GameSim</td>
+          <td>Round 3 — READY + 12 answers processed</td>
+          <td style="color:#721c24;font-weight:bold;text-align:center">✗</td>
+          <td style="text-align:right">3657 ms</td>
+          <td style="font-size:0.85em;color:#555">pipe_hits: 6<br>correct_tables: 3</td>
+          <td style="font-size:0.85em;color:#c00">pipe_hits=6/12, ready=True</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#f8d7da">
+          <td>GameSim</td>
+          <td>Round 4 — READY + 12 answers processed</td>
+          <td style="color:#721c24;font-weight:bold;text-align:center">✗</td>
+          <td style="text-align:right">4763 ms</td>
+          <td style="font-size:0.85em;color:#555">pipe_hits: 4<br>correct_tables: 4</td>
+          <td style="font-size:0.85em;color:#c00">pipe_hits=4/12, ready=True</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#f8d7da">
+          <td>GameSim</td>
+          <td>Round 5 — READY + 12 answers processed</td>
+          <td style="color:#721c24;font-weight:bold;text-align:center">✗</td>
+          <td style="text-align:right">4210 ms</td>
+          <td style="font-size:0.85em;color:#555">pipe_hits: 5<br>correct_tables: 5</td>
+          <td style="font-size:0.85em;color:#c00">pipe_hits=5/12, ready=True</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>GameSim</td>
+          <td>Overall game — all rounds completed</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">19403 ms</td>
+          <td style="font-size:0.85em;color:#555">answers_sent: 60<br>answers_forwarded: 28<br>forward_rate_pct: 46.7<br>throughput_msg_s: 3.1</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Leaderboard</td>
+          <td>Single answer @5:B forwarded</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Leaderboard</td>
+          <td>Single answer @12:D forwarded</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Leaderboard</td>
+          <td>All answers A forwarded</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#f8d7da">
+          <td>Leaderboard</td>
+          <td>Pipe accepts: Score: +100 to tables 1,2,3</td>
+          <td style="color:#721c24;font-weight:bold;text-align:center">✗</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">(2, 'CreateFile', 'The system cannot find the file specified.')</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Leaderboard</td>
+          <td>Pipe accepts: Score: -50 to table 7</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Leaderboard</td>
+          <td>Pipe accepts: Score: +75 to all via X</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Leaderboard</td>
+          <td>Pipe accepts: Answer indicators multi-format</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">0 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Stress</td>
+          <td>30 simultaneous connections</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">527 ms</td>
+          <td style="font-size:0.85em;color:#555">connected: 30<br>failed: 0<br>avg_connect_ms: 397.9</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Stress</td>
+          <td>500 rapid answer messages (throughput)</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">4 ms</td>
+          <td style="font-size:0.85em;color:#555">sent: 500<br>errors: 0<br>throughput_msg_s: 124578.4<br>elapsed_ms: 4.0</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Stress</td>
+          <td>Server still accepts connections after flood</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">11 ms</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Stress</td>
+          <td>Reconnect stress — 20 connect/disconnect cycles</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">1258 ms</td>
+          <td style="font-size:0.85em;color:#555">successes: 20<br>failures: 0</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+        <tr style="background:#d4edda">
+          <td>Stress</td>
+          <td>Mixed concurrent load (answers + READY triggers)</td>
+          <td style="color:#1e7e34;font-weight:bold;text-align:center">✓</td>
+          <td style="text-align:right">1003 ms</td>
+          <td style="font-size:0.85em;color:#555">send_errors: 0</td>
+          <td style="font-size:0.85em;color:#c00">—</td>
+          <td style="font-size:0.85em;color:#555">—</td>
+        </tr>
+</table>
+<p style="color:#888;font-size:0.85em">
+  Generated by gameshow_tester.py
+</p>
+</body></html>

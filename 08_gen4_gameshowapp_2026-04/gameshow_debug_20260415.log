@@ -1,0 +1,60 @@
+# ===== SESSION 20260415_115454 =====
+{"time": "2026-04-15T11:54:54.672", "category": "INFO", "message": "\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557", "extra": {}}
+{"time": "2026-04-15T11:54:54.672", "category": "INFO", "message": "\u2551        GAMESHOW DIAGNOSTIC LOGGER  v1.0              \u2551", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "\u255a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255d", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "Session ID   : 20260415_115454", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "Log file     : .\\gameshow_debug_20260415_115454.log", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "TCP port     : 8080", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "Pipe sniff   : YES", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "DB watch     : YES", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "  START ORDER:", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "    1. Run this logger first", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "    2. Run leaderboard.py", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "    3. Run bsd.py (GameServer)", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "    4. Run gameshow2.py / enter.py as normal", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "  The logger acts as the TCP server on the chosen port.", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "  All traffic from buzzers/tablets flows through it.", "extra": {}}
+{"time": "2026-04-15T11:54:54.673", "category": "INFO", "message": "  Press Ctrl+C to stop.\n", "extra": {}}
+{"time": "2026-04-15T11:54:54.674", "category": "INFO", "message": "TCP sniffer starting on port 8080 \u2026", "extra": {}}
+{"time": "2026-04-15T11:54:54.674", "category": "INFO", "message": "Named-pipe sniffer active on \\\\.\\pipe\\gameshow_pipe", "extra": {}}
+{"time": "2026-04-15T11:54:54.674", "category": "NET", "message": "Listening on 0.0.0.0:8080  (all network interfaces)", "extra": {}}
+{"time": "2026-04-15T11:54:54.679", "category": "INFO", "message": "DB watcher monitoring: access_codes.db", "extra": {}}
+{"time": "2026-04-15T11:55:24.682", "category": "STAT", "message": "\u2500\u2500\u2500 SESSION STATS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", "extra": {}}
+{"time": "2026-04-15T11:55:24.682", "category": "STAT", "message": "  Uptime            : 0:00:30", "extra": {}}
+{"time": "2026-04-15T11:55:24.682", "category": "STAT", "message": "  Connections       : 0", "extra": {}}
+{"time": "2026-04-15T11:55:24.682", "category": "STAT", "message": "  Disconnections    : 0", "extra": {}}
+{"time": "2026-04-15T11:55:24.682", "category": "STAT", "message": "  Messages received : 0", "extra": {}}
+{"time": "2026-04-15T11:55:24.682", "category": "STAT", "message": "  Pipe commands     : 0", "extra": {}}
+{"time": "2026-04-15T11:55:24.682", "category": "STAT", "message": "  DB events         : 0", "extra": {}}
+{"time": "2026-04-15T11:55:24.682", "category": "STAT", "message": "  Errors            : 0", "extra": {}}
+{"time": "2026-04-15T11:55:24.682", "category": "STAT", "message": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", "extra": {}}
+{"time": "2026-04-15T11:55:54.685", "category": "STAT", "message": "\u2500\u2500\u2500 SESSION STATS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", "extra": {}}
+{"time": "2026-04-15T11:55:54.685", "category": "STAT", "message": "  Uptime            : 0:01:00", "extra": {}}
+{"time": "2026-04-15T11:55:54.685", "category": "STAT", "message": "  Connections       : 0", "extra": {}}
+{"time": "2026-04-15T11:55:54.685", "category": "STAT", "message": "  Disconnections    : 0", "extra": {}}
+{"time": "2026-04-15T11:55:54.685", "category": "STAT", "message": "  Messages received : 0", "extra": {}}
+{"time": "2026-04-15T11:55:54.685", "category": "STAT", "message": "  Pipe commands     : 0", "extra": {}}
+{"time": "2026-04-15T11:55:54.685", "category": "STAT", "message": "  DB events         : 0", "extra": {}}
+{"time": "2026-04-15T11:55:54.685", "category": "STAT", "message": "  Errors            : 0", "extra": {}}
+{"time": "2026-04-15T11:55:54.686", "category": "STAT", "message": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", "extra": {}}
+{"time": "2026-04-15T11:56:24.687", "category": "STAT", "message": "\u2500\u2500\u2500 SESSION STATS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", "extra": {}}
+{"time": "2026-04-15T11:56:24.687", "category": "STAT", "message": "  Uptime            : 0:01:30", "extra": {}}
+{"time": "2026-04-15T11:56:24.687", "category": "STAT", "message": "  Connections       : 0", "extra": {}}
+{"time": "2026-04-15T11:56:24.687", "category": "STAT", "message": "  Disconnections    : 0", "extra": {}}
+{"time": "2026-04-15T11:56:24.687", "category": "STAT", "message": "  Messages received : 0", "extra": {}}
+{"time": "2026-04-15T11:56:24.688", "category": "STAT", "message": "  Pipe commands     : 0", "extra": {}}
+{"time": "2026-04-15T11:56:24.688", "category": "STAT", "message": "  DB events         : 0", "extra": {}}
+{"time": "2026-04-15T11:56:24.688", "category": "STAT", "message": "  Errors            : 0", "extra": {}}
+{"time": "2026-04-15T11:56:24.688", "category": "STAT", "message": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", "extra": {}}
+{"time": "2026-04-15T11:56:54.689", "category": "STAT", "message": "\u2500\u2500\u2500 SESSION STATS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", "extra": {}}
+{"time": "2026-04-15T11:56:54.689", "category": "STAT", "message": "  Uptime            : 0:02:00", "extra": {}}
+{"time": "2026-04-15T11:56:54.689", "category": "STAT", "message": "  Connections       : 0", "extra": {}}
+{"time": "2026-04-15T11:56:54.689", "category": "STAT", "message": "  Disconnections    : 0", "extra": {}}
+{"time": "2026-04-15T11:56:54.689", "category": "STAT", "message": "  Messages received : 0", "extra": {}}
+{"time": "2026-04-15T11:56:54.690", "category": "STAT", "message": "  Pipe commands     : 0", "extra": {}}
+{"time": "2026-04-15T11:56:54.690", "category": "STAT", "message": "  DB events         : 0", "extra": {}}
+{"time": "2026-04-15T11:56:54.690", "category": "STAT", "message": "  Errors            : 0", "extra": {}}
+{"time": "2026-04-15T11:56:54.690", "category": "STAT", "message": "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500", "extra": {}}
+{"time": "2026-04-15T11:57:08.948", "category": "INFO", "message": "Shutting down logger \u2026", "extra": {}}

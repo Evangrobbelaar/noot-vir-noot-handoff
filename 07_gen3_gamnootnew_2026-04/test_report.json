@@ -1,0 +1,460 @@
+{
+  "timestamp": "2026-04-20 13:34:04",
+  "server": "127.0.0.1:8080",
+  "summary": {
+    "total": 36,
+    "passed": 30,
+    "failed": 6,
+    "pass_rate": "83.3%"
+  },
+  "results": [
+    {
+      "category": "Connection",
+      "name": "TCP connect + handshake",
+      "passed": true,
+      "duration_ms": 20.05,
+      "error": null,
+      "metrics": {
+        "connect_ms": 20.0
+      },
+      "notes": ""
+    },
+    {
+      "category": "Connection",
+      "name": "12 simultaneous connections",
+      "passed": true,
+      "duration_ms": 534.56,
+      "error": null,
+      "metrics": {
+        "connected": 12,
+        "failed": 0
+      },
+      "notes": ""
+    },
+    {
+      "category": "Connection",
+      "name": "Clean disconnect",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Connection",
+      "name": "Wrong port rejected",
+      "passed": true,
+      "duration_ms": 2013.33,
+      "error": null,
+      "metrics": {},
+      "notes": "Connection to wrong port should be refused"
+    },
+    {
+      "category": "Protocol",
+      "name": "DASHBOARD-READY-TRIGGER broadcasts READY to all clients",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {
+        "received_by": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "category": "Protocol",
+      "name": "Colour sequence \u2014 RED sent to all clients after READY",
+      "passed": true,
+      "duration_ms": 500.0,
+      "error": null,
+      "metrics": {
+        "received_by": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "notes": "Full sequence is RED(0s)\u2192READY+GREEN(5s)\u2192BLUE(15s)\u2192OFF(20s)"
+    },
+    {
+      "category": "Protocol",
+      "name": "awns_A accepted by server",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Protocol",
+      "name": "awns_B accepted by server",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Protocol",
+      "name": "awns_C accepted by server",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Protocol",
+      "name": "awns_D accepted by server",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Protocol",
+      "name": "Table 1 answer forwarded to leaderboard pipe",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {
+        "message": "@1:A"
+      },
+      "notes": ""
+    },
+    {
+      "category": "Protocol",
+      "name": "Table 2 answer forwarded to leaderboard pipe",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {
+        "message": "@2:A"
+      },
+      "notes": ""
+    },
+    {
+      "category": "Protocol",
+      "name": "Table 3 answer forwarded to leaderboard pipe",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {
+        "message": "@3:A"
+      },
+      "notes": ""
+    },
+    {
+      "category": "Protocol",
+      "name": "Table 4 answer forwarded to leaderboard pipe",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {
+        "message": "@4:A"
+      },
+      "notes": ""
+    },
+    {
+      "category": "Protocol",
+      "name": "Invalid answer (@1:X) NOT forwarded to leaderboard",
+      "passed": true,
+      "duration_ms": 300.0,
+      "error": null,
+      "metrics": {},
+      "notes": "Server should log invalid format but not forward"
+    },
+    {
+      "category": "Protocol",
+      "name": "PING accepted without crash",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "GameSim",
+      "name": "Gameshow client connects",
+      "passed": true,
+      "duration_ms": 17.08,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "GameSim",
+      "name": "All 12 table clients connect",
+      "passed": true,
+      "duration_ms": 15.52,
+      "error": null,
+      "metrics": {
+        "avg_ms": 10.2,
+        "max_ms": 15.5
+      },
+      "notes": ""
+    },
+    {
+      "category": "GameSim",
+      "name": "Round 1 \u2014 READY + 12 answers processed",
+      "passed": false,
+      "duration_ms": 4200.86,
+      "error": "pipe_hits=5/12, ready=True",
+      "metrics": {
+        "pipe_hits": 5,
+        "correct_tables": 2
+      },
+      "notes": ""
+    },
+    {
+      "category": "GameSim",
+      "name": "Round 2 \u2014 READY + 12 answers processed",
+      "passed": false,
+      "duration_ms": 2571.0,
+      "error": "pipe_hits=8/12, ready=True",
+      "metrics": {
+        "pipe_hits": 8,
+        "correct_tables": 3
+      },
+      "notes": ""
+    },
+    {
+      "category": "GameSim",
+      "name": "Round 3 \u2014 READY + 12 answers processed",
+      "passed": false,
+      "duration_ms": 3656.94,
+      "error": "pipe_hits=6/12, ready=True",
+      "metrics": {
+        "pipe_hits": 6,
+        "correct_tables": 3
+      },
+      "notes": ""
+    },
+    {
+      "category": "GameSim",
+      "name": "Round 4 \u2014 READY + 12 answers processed",
+      "passed": false,
+      "duration_ms": 4763.48,
+      "error": "pipe_hits=4/12, ready=True",
+      "metrics": {
+        "pipe_hits": 4,
+        "correct_tables": 4
+      },
+      "notes": ""
+    },
+    {
+      "category": "GameSim",
+      "name": "Round 5 \u2014 READY + 12 answers processed",
+      "passed": false,
+      "duration_ms": 4210.36,
+      "error": "pipe_hits=5/12, ready=True",
+      "metrics": {
+        "pipe_hits": 5,
+        "correct_tables": 5
+      },
+      "notes": ""
+    },
+    {
+      "category": "GameSim",
+      "name": "Overall game \u2014 all rounds completed",
+      "passed": true,
+      "duration_ms": 19402.7,
+      "error": null,
+      "metrics": {
+        "answers_sent": 60,
+        "answers_forwarded": 28,
+        "forward_rate_pct": 46.7,
+        "throughput_msg_s": 3.1,
+        "rounds": [
+          {
+            "round": 1,
+            "correct_answer": "A",
+            "ready_delivered": true,
+            "answers_forwarded": 5,
+            "correct_tables": 2,
+            "duration_ms": 4200.9
+          },
+          {
+            "round": 2,
+            "correct_answer": "B",
+            "ready_delivered": true,
+            "answers_forwarded": 8,
+            "correct_tables": 3,
+            "duration_ms": 2571.0
+          },
+          {
+            "round": 3,
+            "correct_answer": "C",
+            "ready_delivered": true,
+            "answers_forwarded": 6,
+            "correct_tables": 3,
+            "duration_ms": 3656.9
+          },
+          {
+            "round": 4,
+            "correct_answer": "D",
+            "ready_delivered": true,
+            "answers_forwarded": 4,
+            "correct_tables": 4,
+            "duration_ms": 4763.5
+          },
+          {
+            "round": 5,
+            "correct_answer": "A",
+            "ready_delivered": true,
+            "answers_forwarded": 5,
+            "correct_tables": 5,
+            "duration_ms": 4210.4
+          }
+        ]
+      },
+      "notes": ""
+    },
+    {
+      "category": "Leaderboard",
+      "name": "Single answer @5:B forwarded",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Leaderboard",
+      "name": "Single answer @12:D forwarded",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Leaderboard",
+      "name": "All answers A forwarded",
+      "passed": true,
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Leaderboard",
+      "name": "Pipe accepts: Score: +100 to tables 1,2,3",
+      "passed": false,
+      "duration_ms": 0.0,
+      "error": "(2, 'CreateFile', 'The system cannot find the file specified.')",
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Leaderboard",
+      "name": "Pipe accepts: Score: -50 to table 7",
+      "passed": [
+        [
+          0,
+          5
+        ],
+        null
+      ],
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Leaderboard",
+      "name": "Pipe accepts: Score: +75 to all via X",
+      "passed": [
+        [
+          0,
+          5
+        ],
+        null
+      ],
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Leaderboard",
+      "name": "Pipe accepts: Answer indicators multi-format",
+      "passed": [
+        [
+          0,
+          19
+        ],
+        null
+      ],
+      "duration_ms": 0.0,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Stress",
+      "name": "30 simultaneous connections",
+      "passed": true,
+      "duration_ms": 527.11,
+      "error": null,
+      "metrics": {
+        "connected": 30,
+        "failed": 0,
+        "avg_connect_ms": 397.9
+      },
+      "notes": ""
+    },
+    {
+      "category": "Stress",
+      "name": "500 rapid answer messages (throughput)",
+      "passed": true,
+      "duration_ms": 4.01,
+      "error": null,
+      "metrics": {
+        "sent": 500,
+        "errors": 0,
+        "throughput_msg_s": 124578.4,
+        "elapsed_ms": 4.0
+      },
+      "notes": ""
+    },
+    {
+      "category": "Stress",
+      "name": "Server still accepts connections after flood",
+      "passed": true,
+      "duration_ms": 10.56,
+      "error": null,
+      "metrics": {},
+      "notes": ""
+    },
+    {
+      "category": "Stress",
+      "name": "Reconnect stress \u2014 20 connect/disconnect cycles",
+      "passed": true,
+      "duration_ms": 1257.5,
+      "error": null,
+      "metrics": {
+        "successes": 20,
+        "failures": 0
+      },
+      "notes": ""
+    },
+    {
+      "category": "Stress",
+      "name": "Mixed concurrent load (answers + READY triggers)",
+      "passed": true,
+      "duration_ms": 1003.42,
+      "error": null,
+      "metrics": {
+        "send_errors": 0
+      },
+      "notes": ""
+    }
+  ]
+}

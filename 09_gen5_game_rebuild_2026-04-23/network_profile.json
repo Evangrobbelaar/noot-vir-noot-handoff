@@ -1,0 +1,15 @@
+{
+  "adapter": "Wi-Fi",
+  "gameshow_ip": "192.168.8.160",
+  "gameshow_subnet": "255.255.255.0",
+  "gameshow_gateway": "192.168.8.1",
+  "gameshow_dns": "8.8.8.8",
+  "backup": {
+    "adapter": "Wi-Fi",
+    "dhcp": true,
+    "ip": "192.168.0.107",
+    "subnet": "255.255.255.0",
+    "gateway": "192.168.0.1",
+    "dns": ""
+  }
+}

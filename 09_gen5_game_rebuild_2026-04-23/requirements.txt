@@ -1,0 +1,7 @@
+python-vlc
+pygame
+pywin32
+pynput
+keyboard
+psutil
+PyQt5

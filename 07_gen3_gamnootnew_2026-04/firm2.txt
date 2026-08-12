@@ -1,0 +1,274 @@
+#include <EEPROM.h>
+#include <ArduinoBLE.h>
+#include <ArduinoJson.h>
+#include <ESP32Time.h>
+#include <Update.h>
+#include <esp_task_wdt.h>
+
+// Constants
+#define WDT_TIMEOUT 30  // Watchdog timer timeout in seconds
+#define FIRMWARE_VERSION "2.0.0"
+#define MAX_BUFFER_SIZE 256
+#define JSON_BUFFER_SIZE 512
+#define LOG_ENTRIES 100
+#define VOLTAGE_CHECK_PIN 34
+#define MIN_VOLTAGE_THRESHOLD 11.0  // Minimum voltage threshold in volts
+
+// EEPROM addresses
+const uint16_t EEPROM_ADDRESS_START = 0x0000;
+struct EEPROMLayout {
+    uint16_t serialHiByte;
+    uint16_t serialLoByte;
+    uint16_t dtbc;
+    uint16_t dftpf;
+    uint16_t nch;
+    uint16_t sudly;
+    uint16_t icdly;
+    uint16_t fpdif;
+    char bluetoothName[32];
+    char cubeSerialNo[32];
+};
+
+// Data logging structure
+struct LogEntry {
+    uint32_t timestamp;
+    uint8_t eventType;
+    uint8_t channel;
+    float pressure;
+    uint8_t status;
+};
+
+// Global variables
+StaticJsonDocument<JSON_BUFFER_SIZE> jsonDoc;
+ESP32Time rtc;
+LogEntry logBuffer[LOG_ENTRIES];
+uint16_t logIndex = 0;
+char rxBuffer[MAX_BUFFER_SIZE];
+uint16_t rxIndex = 0;
+bool systemError = false;
+uint8_t errorCode = 0;
+
+// System state
+struct SystemState {
+    uint8_t currentState;
+    bool flushCycleRunning;
+    uint16_t startUpDelaySeconds;
+    uint16_t interChannelDelayTime;
+    uint8_t outputState;
+    float currentPressure;
+    uint32_t lastCycleTime;
+} state;
+
+class SafetyMonitor {
+private:
+    const float VOLTAGE_REFERENCE = 3.3;
+    const float VOLTAGE_DIVIDER_RATIO = 0.5;
+    
+public:
+    bool checkVoltage() {
+        float voltage = analogRead(VOLTAGE_CHECK_PIN) * VOLTAGE_REFERENCE / 4095.0 / VOLTAGE_DIVIDER_RATIO;
+        return voltage >= MIN_VOLTAGE_THRESHOLD;
+    }
+    
+    void emergencyShutdown() {
+        digitalWrite(OUTPUT_MAIN_VALVE, LOW);
+        systemError = true;
+        logEvent(ERROR_EMERGENCY_SHUTDOWN);
+    }
+};
+
+class EEPROMManager {
+private:
+    EEPROMLayout layout;
+    
+public:
+    bool init() {
+        if (!EEPROM.begin(512)) {
+            return false;
+        }
+        return true;
+    }
+    
+    bool write(uint16_t address, uint8_t value) {
+        if (address >= EEPROM.length()) {
+            return false;
+        }
+        EEPROM.write(address, value);
+        return EEPROM.commit();
+    }
+    
+    uint8_t read(uint16_t address) {
+        if (address >= EEPROM.length()) {
+            return 0;
+        }
+        return EEPROM.read(address);
+    }
+};
+
+class BluetoothHandler {
+private:
+    BLEService emsService;
+    BLECharacteristic commandChar;
+    StaticJsonDocument<JSON_BUFFER_SIZE> jsonResponse;
+    
+    void handleCommand(const char* command) {
+        if (strncmp(command, "EMS-VARIABLES?", 13) == 0) {
+            sendSystemVariables();
+        } else if (strncmp(command, "EMS-RTC=", 8) == 0) {
+            updateRTC(command);
+        }
+        // Add other command handlers
+    }
+    
+    void sendSystemVariables() {
+        jsonResponse.clear();
+        jsonResponse["ems-sn"] = getSerialNumber();
+        jsonResponse["ems-esn"] = EsnBuffer;
+        jsonResponse["cube_sn"] = SavedCubeSerialNo;
+        // Add other variables
+        
+        String response;
+        serializeJson(jsonResponse, response);
+        commandChar.writeValue(response.c_str());
+    }
+    
+public:
+    bool init() {
+        if (!BLE.begin()) {
+            return false;
+        }
+        // Setup service and characteristic
+        return true;
+    }
+    
+    void update() {
+        BLE.poll();
+    }
+};
+
+class DataLogger {
+private:
+    LogEntry* buffer;
+    uint16_t size;
+    uint16_t index;
+    
+public:
+    DataLogger(LogEntry* buf, uint16_t bufSize) : buffer(buf), size(bufSize), index(0) {}
+    
+    void log(uint8_t eventType, uint8_t channel, float pressure) {
+        LogEntry entry = {
+            .timestamp = rtc.getEpoch(),
+            .eventType = eventType,
+            .channel = channel,
+            .pressure = pressure,
+            .status = state.currentState
+        };
+        
+        buffer[index] = entry;
+        index = (index + 1) % size;
+    }
+    
+    String getLogJson(uint16_t count) {
+        StaticJsonDocument<JSON_BUFFER_SIZE> doc;
+        JsonArray array = doc.createNestedArray("logs");
+        
+        uint16_t start = (index >= count) ? index - count : 0;
+        for (uint16_t i = start; i < index; i++) {
+            JsonObject entry = array.createNestedObject();
+            entry["time"] = buffer[i].timestamp;
+            entry["event"] = buffer[i].eventType;
+            entry["channel"] = buffer[i].channel;
+            entry["pressure"] = buffer[i].pressure;
+            entry["status"] = buffer[i].status;
+        }
+        
+        String output;
+        serializeJson(doc, output);
+        return output;
+    }
+};
+
+// Main system class
+class EMSController {
+private:
+    EEPROMManager eeprom;
+    BluetoothHandler bluetooth;
+    DataLogger logger;
+    SafetyMonitor safety;
+    
+    void setupWatchdog() {
+        esp_task_wdt_init(WDT_TIMEOUT, true);
+        esp_task_wdt_add(NULL);
+    }
+    
+    void handleFlushCycle() {
+        if (!state.flushCycleRunning) return;
+        
+        switch (state.currentState) {
+            case 100:  // Startup delay
+                if (state.startUpDelaySeconds > 0) {
+                    state.startUpDelaySeconds--;
+                } else {
+                    state.currentState = 200;
+                    logger.log(EVENT_CYCLE_START, 0, state.currentPressure);
+                }
+                break;
+                
+            case 200:  // Channel operation
+                // Channel logic
+                break;
+                
+            default:
+                break;
+        }
+    }
+    
+public:
+    EMSController() : logger(logBuffer, LOG_ENTRIES) {}
+    
+    bool init() {
+        if (!eeprom.init() || !bluetooth.init()) {
+            return false;
+        }
+        
+        setupWatchdog();
+        return true;
+    }
+    
+    void update() {
+        esp_task_wdt_reset();  // Reset watchdog timer
+        
+        // Check system voltage
+        if (!safety.checkVoltage()) {
+            safety.emergencyShutdown();
+            return;
+        }
+        
+        bluetooth.update();
+        handleFlushCycle();
+        
+        // Update display
+        if (millis() - lastDisplayUpdate > DISPLAY_UPDATE_INTERVAL) {
+            updateDisplay();
+            lastDisplayUpdate = millis();
+        }
+    }
+};
+
+// Global instance
+EMSController emsController;
+
+void setup() {
+    Serial.begin(115200);
+    
+    if (!emsController.init()) {
+        Serial.println("System initialization failed!");
+        while (1) {
+            delay(1000);
+        }
+    }
+}
+
+void loop() {
+    emsController.update();
+}
