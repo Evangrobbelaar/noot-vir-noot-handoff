@@ -621,6 +621,36 @@ def scene_options_base(q: dict, bg: Image.Image, theme: dict) -> Image.Image:
     return img
 
 
+def scene_ff_base(q: dict, bg: Image.Image, theme: dict) -> Image.Image:
+    """Fastest-finger countdown screen — large centered ring, no A/B/C/D cards."""
+    img = _hdr_overlay(bg.copy(), theme)
+    acc = theme["accent"]
+    txt = theme["text"]
+    d = ImageDraw.Draw(img)
+    d.line([(0, 122), (W, 122)], fill=acc, width=3)
+    _glow_text(
+        img,
+        "FASTEST FINGER!",
+        (W // 2, H // 2 - 110),
+        FD(118),
+        txt,
+        acc,
+        radius=32,
+        anchor="mm",
+    )
+    _glow_text(
+        img,
+        "First to press any button gets to answer",
+        (W // 2, H // 2 + 30),
+        FR(44),
+        txt,
+        acc,
+        radius=12,
+        anchor="mm",
+    )
+    return img
+
+
 def scene_timeout(q: dict, bg: Image.Image, theme: dict) -> Image.Image:
     img = bg.copy()
     # Red tint
@@ -931,6 +961,21 @@ class RenderWorker(QThread):
                 import shutil
 
                 shutil.move(str(info), str(out))
+                # Write per-video sidecar so the player knows exact pause timestamps
+                dis = DISSOLVE_N / FPS
+                opts = int(q.get("options_duration", SCENE_DUR["options"]))
+                pause1_ms = int(SCENE_DUR["category"] * 1000)
+                pause2_ms = int(
+                    (SCENE_DUR["category"] + dis + SCENE_DUR["question"] + dis + opts)
+                    * 1000
+                )
+                meta = {
+                    "mode": q.get("type", "MC").upper(),
+                    "pause_ms": [pause1_ms, pause2_ms],
+                }
+                out.with_suffix(".meta.json").write_text(
+                    json.dumps(meta, indent=2), encoding="utf-8"
+                )
                 self.log_msg.emit(f"  ✔ {fname}")
             else:
                 errors.append(f"{fname}: {info}")
@@ -1112,6 +1157,7 @@ def _encode_question(
     theme = THEMES[theme_idx]
     rng = random.Random(qnum * 17 + 3)
     opts_dur = int(q.get("options_duration", SCENE_DUR["options"]))
+    q_type = q.get("type", "MC").upper()
 
     try:
         bg = _make_bg(theme, rng)
@@ -1125,7 +1171,12 @@ def _encode_question(
     try:
         s1 = np.array(scene_category(q, bg, theme), dtype=np.float32)
         s2 = np.array(scene_question(q, bg, theme), dtype=np.float32)
-        s3 = np.array(scene_options_base(q, bg, theme), dtype=np.float32)
+        s3 = np.array(
+            scene_ff_base(q, bg, theme)
+            if q_type == "FF"
+            else scene_options_base(q, bg, theme),
+            dtype=np.float32,
+        )
         s4 = np.array(scene_timeout(q, bg, theme), dtype=np.float32)
         s5 = np.array(scene_answer(q, bg, theme), dtype=np.float32)
     except Exception as e:
@@ -1242,9 +1293,11 @@ def _encode_question(
         # ── Dissolve 2 → 3 ───────────────────────────────────────────────────
         _dissolve(s3)
 
-        # ── Scene 3: Options + animated timer ────────────────────────────────
+        # ── Scene 3: Countdown (MC = options + corner timer; FF = big centred ring) ──
         n3 = opts_dur * FPS
         f_off3 = n1 + n2
+        # FF uses a large centred timer so contestants can see the countdown clearly
+        ff_cx, ff_cy, ff_ro, ff_ri = W // 2, H // 2 + 100, 200, 140
         for f in range(n3):
             progress = 1.0 - f / n3
             pv = _pulse(f, n3)
@@ -1252,18 +1305,24 @@ def _encode_question(
             img = Image.fromarray(arr)
             d = ImageDraw.Draw(img)
             _draw_bg_particles(d, bg_particles, f_off3 + f)
-            _timer_ring(
-                img, _TIMER_CX, _TIMER_CY, _TIMER_RO, _TIMER_RI, progress, acc, warn
-            )
             secs_left = math.ceil(progress * opts_dur)
             col = acc if progress > 0.3 else warn
-            ImageDraw.Draw(img).text(
-                (_TIMER_CX, _TIMER_CY),
-                str(secs_left),
-                font=FD(46),
-                fill=col,
-                anchor="mm",
-            )
+            if q_type == "FF":
+                _timer_ring(img, ff_cx, ff_cy, ff_ro, ff_ri, progress, acc, warn)
+                ImageDraw.Draw(img).text(
+                    (ff_cx, ff_cy), str(secs_left), font=FD(110), fill=col, anchor="mm"
+                )
+            else:
+                _timer_ring(
+                    img, _TIMER_CX, _TIMER_CY, _TIMER_RO, _TIMER_RI, progress, acc, warn
+                )
+                ImageDraw.Draw(img).text(
+                    (_TIMER_CX, _TIMER_CY),
+                    str(secs_left),
+                    font=FD(46),
+                    fill=col,
+                    anchor="mm",
+                )
             # ── Tension vignette: red edges pulse when < 30% time left ────────
             if progress < 0.3:
                 urgency = np.float32(1.0 - progress / 0.3)
@@ -1418,7 +1477,7 @@ def _blank_question(number: int) -> dict:
         "answer_image": "",
         "question_audio": "",
         "answer_audio": "",
-        "options_duration": 15,
+        "options_duration": 5,
     }
 
 
@@ -1554,7 +1613,7 @@ class QuestionDialog(QDialog):
                 f"Option {letter}:", _le(f"option_{letter.lower()}", f"Answer {letter}")
             )
 
-        lay.addRow("Timer (s):", _le("options_duration", "15"))
+        lay.addRow("Timer (s):", _le("options_duration", "5"))
 
         bb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         bb.accepted.connect(self.accept)
@@ -1613,9 +1672,9 @@ class QuestionDialog(QDialog):
         except (ValueError, KeyError, TypeError):
             self._q["number"] = 1
         try:
-            self._q["options_duration"] = int(self._q.get("options_duration", 15))
+            self._q["options_duration"] = int(self._q.get("options_duration", 5))
         except (ValueError, TypeError):
-            self._q["options_duration"] = 15
+            self._q["options_duration"] = 5
         return self._q
 
 

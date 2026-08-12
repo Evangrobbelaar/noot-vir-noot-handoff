@@ -1,0 +1,595 @@
+<title>Noot-vir-Noot — Game Flow & Product Brief</title>
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --text: #1A1917;
+    --text-muted: #6B6860;
+    --accent: #C8880E;
+    --accent-light: #F5E8CC;
+    --rule: #E0DDD6;
+    --step-bg: #F0EDE8;
+    --tag-bg: #EEEAE4;
+    --tag-text: #4A4540;
+    --callout-bg: #FDF6E8;
+    --callout-border: #E8A020;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0F1117;
+      --surface: #1A1D27;
+      --text: #E8E6E1;
+      --text-muted: #7A8099;
+      --accent: #E8A020;
+      --accent-light: #2A2210;
+      --rule: #2A2D3A;
+      --step-bg: #1E2130;
+      --tag-bg: #22253A;
+      --tag-text: #A0A8C0;
+      --callout-bg: #1E1A0E;
+      --callout-border: #E8A020;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0F1117;
+    --surface: #1A1D27;
+    --text: #E8E6E1;
+    --text-muted: #7A8099;
+    --accent: #E8A020;
+    --accent-light: #2A2210;
+    --rule: #2A2D3A;
+    --step-bg: #1E2130;
+    --tag-bg: #22253A;
+    --tag-text: #A0A8C0;
+    --callout-bg: #1E1A0E;
+    --callout-border: #E8A020;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    padding: 48px 24px 96px;
+  }
+
+  .doc { max-width: 800px; margin: 0 auto; }
+
+  .doc-header {
+    padding-bottom: 40px;
+    border-bottom: 2px solid var(--accent);
+    margin-bottom: 48px;
+  }
+  .doc-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+  }
+  .doc-title {
+    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-size: clamp(30px, 5vw, 46px); font-weight: normal;
+    line-height: 1.15; color: var(--text); margin-bottom: 14px; text-wrap: balance;
+  }
+  .doc-subtitle { font-size: 18px; color: var(--text-muted); margin-bottom: 24px; font-style: italic; }
+  .doc-meta { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 13px; color: var(--text-muted); }
+  .doc-meta span { white-space: nowrap; }
+  .doc-meta strong { color: var(--text); font-weight: 500; }
+
+  .section { margin-bottom: 56px; }
+  .section-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-size: 24px; font-weight: normal; color: var(--text);
+    margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--rule);
+  }
+  .section p { margin-bottom: 16px; }
+  .section p:last-child { margin-bottom: 0; }
+
+  /* Flow */
+  .flow { display: flex; flex-direction: column; }
+  .flow-step { display: grid; grid-template-columns: 48px 1fr; gap: 0 20px; position: relative; }
+  .flow-step:not(:last-child)::before {
+    content: ''; position: absolute; left: 23px; top: 48px; bottom: 0;
+    width: 2px; background: var(--rule);
+  }
+  .flow-num {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--step-bg); border: 2px solid var(--rule);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 700; color: var(--accent);
+    flex-shrink: 0; position: relative; z-index: 1;
+  }
+  .flow-body { padding: 10px 0 36px; }
+  .flow-label { font-weight: 600; font-size: 16px; color: var(--text); margin-bottom: 6px; }
+  .flow-desc { font-size: 15px; color: var(--text-muted); line-height: 1.6; }
+  .flow-desc p { margin-bottom: 8px; }
+  .flow-desc p:last-child { margin-bottom: 0; }
+
+  /* Video segment rail */
+  .seg-rail { display: flex; flex-direction: column; gap: 0; margin: 24px 0; }
+  .seg { display: flex; align-items: stretch; min-height: 60px; }
+  .seg-marker {
+    width: 36px; flex-shrink: 0; display: flex; flex-direction: column;
+    align-items: center; gap: 0;
+  }
+  .seg-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0; margin-top: 4px;
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  .seg-dot.pause { background: var(--surface); border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+  .seg-line { width: 2px; background: var(--rule); flex: 1; margin-top: 4px; }
+  .seg:last-child .seg-line { display: none; }
+  .seg-content { padding: 0 0 24px 16px; flex: 1; }
+  .seg-name { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 3px; }
+  .seg-detail { font-size: 13px; color: var(--text-muted); }
+  .seg-pause-label {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-light);
+    padding: 2px 8px; border-radius: 2px; margin-bottom: 4px;
+  }
+
+  /* Cards */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--rule);
+    border-top: 3px solid var(--accent); padding: 20px 22px 22px;
+  }
+  .card-name { font-weight: 700; font-size: 15px; color: var(--text); margin-bottom: 6px; }
+  .card-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
+  .card dl dt {
+    font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+    font-size: 10px; letter-spacing: 0.1em; margin-top: 10px; margin-bottom: 2px;
+  }
+  .card dl dd { margin: 0; font-size: 13px; color: var(--text); }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .data-table th {
+    text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-muted);
+    padding: 8px 12px; border-bottom: 2px solid var(--rule);
+  }
+  .data-table td { padding: 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  .data-table tr:last-child td { border-bottom: none; }
+
+  .led-dot {
+    display: inline-block; width: 12px; height: 12px; border-radius: 50%;
+    margin-right: 8px; vertical-align: middle;
+  }
+  .led-cell { display: flex; align-items: center; font-weight: 500; }
+
+  .score-pos { color: #2A9D50; font-weight: 700; }
+  .score-neg { color: #D94040; font-weight: 700; }
+
+  .callout {
+    background: var(--callout-bg); border-left: 3px solid var(--callout-border);
+    padding: 16px 20px; margin: 20px 0; font-size: 14px;
+  }
+  .callout strong { color: var(--accent); }
+
+  .doc ul, .doc ol { padding-left: 20px; margin-bottom: 16px; }
+  .doc li { margin-bottom: 6px; font-size: 15px; }
+  .doc li:last-child { margin-bottom: 0; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .two-col, .card-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div class="doc">
+
+  <header class="doc-header">
+    <div class="doc-eyebrow">Product Brief · Vision Document</div>
+    <h1 class="doc-title">Noot-vir-Noot<br>Gameshow System</h1>
+    <p class="doc-subtitle">Game flow, player experience, and visual product description</p>
+    <div class="doc-meta">
+      <span><strong>Prepared by</strong> Evan Grobbelaar</span>
+      <span><strong>Date</strong> August 2026</span>
+      <span><strong>Audience</strong> Developer / Technical Team</span>
+      <span><strong>Version</strong> 2.0</span>
+    </div>
+  </header>
+
+  <!-- 1. CONCEPT -->
+  <section class="section">
+    <div class="section-eyebrow">01 — Overview</div>
+    <h2 class="section-title">What This Is</h2>
+    <p>Noot-vir-Noot is a live, in-person music and general knowledge quiz show. Contestant teams sit at numbered tables. Each table has a physical button unit with four RGB-LED buttons — A, B, C, and D. A question video plays on a large screen at the front of the room. Everyone watches the same screen.</p>
+    <p>The show is run by a single operator (the host) on a laptop. The operator uses a handheld wireless clicker to control the pacing of the game. The clicker is the only thing the host needs to hold during the show.</p>
+  </section>
+
+  <!-- 2. PHYSICAL SETUP -->
+  <section class="section">
+    <div class="section-eyebrow">02 — Setup</div>
+    <h2 class="section-title">Physical Setup</h2>
+    <ul>
+      <li><strong>1–2 large displays</strong> — projector or TV at the front. Both show identical content via HDMI. Everyone — contestants and audience — watches the same screen at all times.</li>
+      <li><strong>Operator laptop</strong> — the laptop screen is the private control view. The extended display(s) show the game. Connected via HDMI screen extend.</li>
+      <li><strong>Up to 12 tables</strong>, each with one button unit: 4 RGB-LED buttons (A, B, C, D).</li>
+      <li><strong>Teams of 2–4 people</strong> per table share one button unit. One person presses the button on behalf of the team.</li>
+      <li><strong>Handheld clicker</strong> — the host's only control device. Left click = wrong, Right click / forward = correct / next. No keyboard needed during a live show.</li>
+      <li>All button units connect over <strong>WiFi</strong> — no cables to tables.</li>
+    </ul>
+  </section>
+
+  <!-- 3. SHOW STRUCTURE -->
+  <section class="section">
+    <div class="section-eyebrow">03 — Show Structure</div>
+    <h2 class="section-title">How a Show Is Organised</h2>
+    <p>A show consists of multiple <strong>rounds</strong>. Each round has a theme and contains several questions. Between rounds and at dramatic moments, the host toggles the big screen to show the leaderboard. The host controls all pacing — the system never advances on its own except at the end of a countdown timer.</p>
+
+    <div class="two-col" style="margin-top:20px;">
+      <div class="card">
+        <div class="card-name">Typical Show</div>
+        <dl>
+          <dt>Rounds</dt><dd>3–5 rounds per show</dd>
+          <dt>Questions per round</dt><dd>5–10 questions</dd>
+          <dt>Total duration</dt><dd>45 min – 1.5 hours</dd>
+          <dt>Tables</dt><dd>Up to 12, teams of 2–4</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <div class="card-name">Content Types</div>
+        <dl>
+          <dt>Questions</dt><dd>Music clip, Photo, General knowledge</dd>
+          <dt>Answer modes</dt><dd>Multiple choice (A/B/C/D) or Fastest finger</dd>
+          <dt>Other content</dt><dd>Dance breaks, instructional videos</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. SHOW FLOW -->
+  <section class="section">
+    <div class="section-eyebrow">04 — Show Flow</div>
+    <h2 class="section-title">How a Show Runs, Start to Finish</h2>
+
+    <div class="flow" style="margin-top:32px;">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-body">
+          <div class="flow-label">Landing Screen</div>
+          <div class="flow-desc"><p>The big screen shows a holding visual while the venue fills up. The leaderboard can be toggled on here to show table numbers and names.</p></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-body">
+          <div class="flow-label">Intro Video</div>
+          <div class="flow-desc"><p>Host triggers the intro. A short energetic opener plays on the big screen. During this, all button units cycle through random colour patterns — a light show that signals the show is starting. At the end of the intro, all buttons switch off.</p></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-body">
+          <div class="flow-label">Questions (repeated per question)</div>
+          <div class="flow-desc"><p>See Section 05 — Question Flow for the full detail of each question.</p></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-body">
+          <div class="flow-label">Leaderboard (host's discretion)</div>
+          <div class="flow-desc"><p>At any point the host can toggle the big screen to show the animated leaderboard — after a question, between rounds, or to build tension. They toggle back when ready to continue.</p></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-body">
+          <div class="flow-label">Dance Breaks &amp; Instructional Videos</div>
+          <div class="flow-desc"><p>Between rounds, the host can play a dance break video (audience and tables participate) or an instructional video explaining the next round's rules. These play through completely with no pauses.</p></div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">6</div>
+        <div class="flow-body">
+          <div class="flow-label">End of Show</div>
+          <div class="flow-desc"><p>After all questions are done, the host triggers the final leaderboard — a full animated ranking. The winner is announced. The button units celebrate with a colour show.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. QUESTION FLOW -->
+  <section class="section">
+    <div class="section-eyebrow">05 — Question Flow</div>
+    <h2 class="section-title">What Happens During Each Question</h2>
+    <p>Every question video is made up of <strong>five segments</strong> that play in sequence. The video pauses automatically at two points — the host clicks the clicker to advance each time.</p>
+
+    <div class="seg-rail">
+
+      <div class="seg">
+        <div class="seg-marker"><div class="seg-dot"></div><div class="seg-line"></div></div>
+        <div class="seg-content">
+          <div class="seg-name">Segment 1 — Category Reveal</div>
+          <div class="seg-detail">The screen shows the question type: <em>AUDIO QUESTION</em>, <em>PHOTO QUESTION</em>, or <em>GENERAL KNOWLEDGE</em>. Animated background, music. Buttons stay off.</div>
+        </div>
+      </div>
+
+      <div class="seg">
+        <div class="seg-marker"><div class="seg-dot pause"></div><div class="seg-line"></div></div>
+        <div class="seg-content">
+          <div class="seg-pause-label">⏸ Pause 1 — host clicks to continue</div>
+          <div class="seg-detail">Video pauses on the category screen. Host clicks the clicker when the room is ready. Buttons go <strong>solid red</strong> — contestants see this as "not yet."</div>
+        </div>
+      </div>
+
+      <div class="seg">
+        <div class="seg-marker"><div class="seg-dot"></div><div class="seg-line"></div></div>
+        <div class="seg-content">
+          <div class="seg-name">Segment 2 — Question Content (~5 s)</div>
+          <div class="seg-detail">The actual question plays. For audio questions: a music clip. For photo: an image is revealed. For general knowledge: the question text appears. Buttons remain red — still not time to answer.</div>
+        </div>
+      </div>
+
+      <div class="seg">
+        <div class="seg-marker"><div class="seg-dot"></div><div class="seg-line"></div></div>
+        <div class="seg-content">
+          <div class="seg-name">Segment 3 — Countdown (5 s, configurable)</div>
+          <div class="seg-detail">Immediately after the question, the countdown begins with no pause in between. Two modes:<br><br>
+            <strong>Multiple Choice:</strong> A, B, C, D option cards appear with a countdown timer. Buttons arm — each button lights its own colour. All tables press their answer simultaneously. The system records every table's choice.<br><br>
+            <strong>Fastest Finger:</strong> A large "FASTEST FINGER!" screen with a countdown ring. No option cards. Buttons arm. The first table to press any button locks in — their table name/number flashes on the big screen. All other tables lock out.
+          </div>
+        </div>
+      </div>
+
+      <div class="seg">
+        <div class="seg-marker"><div class="seg-dot pause"></div><div class="seg-line"></div></div>
+        <div class="seg-content">
+          <div class="seg-pause-label">⏸ Pause 2 — auto-pause when timer hits zero</div>
+          <div class="seg-detail">The video pauses automatically when the countdown ends. No clicker press needed to trigger this pause.</div>
+        </div>
+      </div>
+
+      <div class="seg">
+        <div class="seg-marker"><div class="seg-dot"></div><div class="seg-line"></div></div>
+        <div class="seg-content">
+          <div class="seg-name">Segment 4 — Timeout Screen</div>
+          <div class="seg-detail">"TIME'S UP!" screen with a red flash. The video is paused here waiting for the host.<br><br>
+            <strong>Multiple Choice:</strong> System has already recorded all answers. Host clicks the clicker to advance — points are awarded automatically as the answer reveals.<br><br>
+            <strong>Fastest Finger:</strong> Host walks to the table that buzzed first (their name is still on screen). Host listens to their verbal answer. Host clicks <strong>RIGHT = correct</strong> or <strong>LEFT = wrong</strong> on the clicker. Points are awarded accordingly. Video then advances to the answer.
+          </div>
+        </div>
+      </div>
+
+      <div class="seg">
+        <div class="seg-marker"><div class="seg-dot"></div><div class="seg-line"></div></div>
+        <div class="seg-content">
+          <div class="seg-name">Segment 5 — Answer Reveal</div>
+          <div class="seg-detail">The correct answer appears in a large animated card with confetti and celebration effects. For fastest finger questions, a <strong>✓ or ✗ symbol appears at the bottom-left of the screen</strong> showing whether the buzzing table answered correctly or not. Button LEDs on each table show green (correct) or red (wrong) based on what they pressed.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="callout">
+      <strong>Dynamic timing:</strong> Each question video has its own pause timestamps baked in. This means different questions can have different countdown lengths (e.g. 5 seconds for a quick round, 10 seconds for a harder question) and the player always pauses at exactly the right moment.
+    </div>
+  </section>
+
+  <!-- 6. BUTTON LEDs -->
+  <section class="section">
+    <div class="section-eyebrow">06 — Button Unit</div>
+    <h2 class="section-title">What Contestants See on Their Button Unit</h2>
+    <p>The LED state is the only communication from the game to the contestants. It must be immediate, expressive, and unambiguous.</p>
+
+    <div class="table-wrap" style="margin-top:20px;">
+      <table class="data-table">
+        <thead>
+          <tr><th>Game State</th><th>LED Appearance</th><th>Meaning</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Intro video</td>
+            <td><div class="led-cell"><span class="led-dot" style="background:linear-gradient(135deg,#E040FB,#00BCD4,#FFD600,#4CAF50)"></span>Random colour cycling on all buttons</div></td>
+            <td>Show is starting — celebration mode</td>
+          </tr>
+          <tr>
+            <td>After intro</td>
+            <td><div class="led-cell"><span class="led-dot" style="background:#222"></span>All off</div></td>
+            <td>Standby — waiting for first question</td>
+          </tr>
+          <tr>
+            <td>Category reveal &amp; question playing</td>
+            <td><div class="led-cell"><span class="led-dot" style="background:#C62828"></span>All buttons solid red</div></td>
+            <td>Watch and listen — do not press yet</td>
+          </tr>
+          <tr>
+            <td>Countdown armed (MC)</td>
+            <td>
+              <div class="led-cell" style="gap:6px; flex-wrap:wrap;">
+                <span><span class="led-dot" style="background:#4CAF50"></span>A</span>
+                <span><span class="led-dot" style="background:#2196F3"></span>B</span>
+                <span><span class="led-dot" style="background:#FFD600"></span>C</span>
+                <span><span class="led-dot" style="background:#E040FB"></span>D</span>
+              </div>
+            </td>
+            <td>Press your answer — each button shows its own colour</td>
+          </tr>
+          <tr>
+            <td>Countdown armed (FF)</td>
+            <td><div class="led-cell"><span class="led-dot" style="background:#FFFFFF"></span>All buttons same colour (white/blue pulse)</div></td>
+            <td>Press any button as fast as possible</td>
+          </tr>
+          <tr>
+            <td>First to buzz (FF)</td>
+            <td><div class="led-cell"><span class="led-dot" style="background:#FF9800"></span>That table pulses amber — others go dark</div></td>
+            <td>Your table buzzed first — answer verbally</td>
+          </tr>
+          <tr>
+            <td>Answer correct</td>
+            <td><div class="led-cell"><span class="led-dot" style="background:#4CAF50"></span>Pressed button glows bright green</div></td>
+            <td>Correct — points awarded</td>
+          </tr>
+          <tr>
+            <td>Answer wrong</td>
+            <td><div class="led-cell"><span class="led-dot" style="background:#C62828"></span>Pressed button glows red</div></td>
+            <td>Wrong — points deducted</td>
+          </tr>
+          <tr>
+            <td>End of show</td>
+            <td><div class="led-cell"><span class="led-dot" style="background:linear-gradient(135deg,#FFD600,#4CAF50)"></span>Colour celebration sequence</div></td>
+            <td>Show over</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout" style="margin-top:20px;">
+      <strong>LED response must feel instant.</strong> When a contestant presses a button the LED feedback must happen within a frame — no perceptible lag. This is the most tactile part of the experience.
+    </div>
+  </section>
+
+  <!-- 7. SCREEN STATES -->
+  <section class="section">
+    <div class="section-eyebrow">07 — Screen</div>
+    <h2 class="section-title">What the Big Screen Shows</h2>
+    <p>The big screen is always in one of three states. The host toggles between them using the clicker or control panel.</p>
+
+    <div class="card-grid" style="margin-top:20px;">
+      <div class="card">
+        <div class="card-name">Game Video</div>
+        <div class="card-desc">Full-screen pre-produced video playing the current question or content. All timing, graphics, music, and text come from the video itself — the host does not manage what appears on screen during a question.</div>
+        <dl><dt>When</dt><dd>During every question segment</dd></dl>
+      </div>
+      <div class="card">
+        <div class="card-name">Leaderboard</div>
+        <div class="card-desc">Animated full-screen ranking. All tables shown with scores, sorted highest first. Positions animate smoothly as scores change. The audience can follow the competition in real time.</div>
+        <dl><dt>When</dt><dd>Host toggles manually at any moment</dd></dl>
+      </div>
+      <div class="card">
+        <div class="card-name">Landing / Holding</div>
+        <div class="card-desc">A visually appealing idle screen shown before the show starts and between major sections. Show branding or a pre-show countdown.</div>
+        <dl><dt>When</dt><dd>Before show starts, at host's discretion</dd></dl>
+      </div>
+    </div>
+
+    <p style="margin-top:20px;">During a <strong>fastest finger</strong> question, when a table buzzes in, their <strong>table name/number appears prominently on the big screen</strong> — so the whole room knows who buzzed first. This overlay stays visible through the timeout screen while the host walks over to hear their answer.</p>
+  </section>
+
+  <!-- 8. QUESTION TYPES -->
+  <section class="section">
+    <div class="section-eyebrow">08 — Question Types</div>
+    <h2 class="section-title">Types of Questions</h2>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-name">Music Clip — Multiple Choice</div>
+        <div class="card-desc">A music clip plays. Teams identify the song/artist from four options.</div>
+        <dl>
+          <dt>Answer mode</dt><dd>All tables press A/B/C/D simultaneously</dd>
+          <dt>Scoring</dt><dd>Automatic</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <div class="card-name">Photo / Visual — Multiple Choice</div>
+        <div class="card-desc">An image is shown. Teams identify what or who it is from four options.</div>
+        <dl>
+          <dt>Answer mode</dt><dd>All tables press A/B/C/D simultaneously</dd>
+          <dt>Scoring</dt><dd>Automatic</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <div class="card-name">General Knowledge — Multiple Choice</div>
+        <div class="card-desc">A text or audio question with four possible answers shown on screen.</div>
+        <dl>
+          <dt>Answer mode</dt><dd>All tables press A/B/C/D simultaneously</dd>
+          <dt>Scoring</dt><dd>Automatic</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <div class="card-name">General Knowledge — Fastest Finger</div>
+        <div class="card-desc">A question is asked. No options shown. First table to press any button gets to answer verbally.</div>
+        <dl>
+          <dt>Answer mode</dt><dd>First buzz wins — others locked out</dd>
+          <dt>Scoring</dt><dd>Host clicks RIGHT (correct) or LEFT (wrong)</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <div class="card-name">Open Question</div>
+        <div class="card-desc">A question with no options. Teams buzz in and answer verbally. Same flow as fastest finger.</div>
+        <dl>
+          <dt>Answer mode</dt><dd>First buzz wins</dd>
+          <dt>Scoring</dt><dd>Host clicks RIGHT or LEFT</dd>
+        </dl>
+      </div>
+      <div class="card">
+        <div class="card-name">Speed / Countdown Round</div>
+        <div class="card-desc">Rapid-fire multiple choice questions played back-to-back with minimal pause between them. High energy, short timers.</div>
+        <dl>
+          <dt>Answer mode</dt><dd>Multiple choice, fast pace</dd>
+          <dt>Scoring</dt><dd>Automatic per question</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. SCORING -->
+  <section class="section">
+    <div class="section-eyebrow">09 — Scoring</div>
+    <h2 class="section-title">Points System</h2>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr><th>Situation</th><th>Points</th><th>How Applied</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Correct multiple choice answer</td><td class="score-pos">+100</td><td>Automatic on answer reveal</td></tr>
+          <tr><td>Wrong multiple choice answer</td><td class="score-neg">−100</td><td>Automatic on answer reveal</td></tr>
+          <tr><td>No answer pressed (MC)</td><td style="color:var(--text-muted)">0</td><td>No change</td></tr>
+          <tr><td>Fastest finger — correct verbal answer</td><td class="score-pos">+100</td><td>Host clicks RIGHT on clicker</td></tr>
+          <tr><td>Fastest finger — wrong verbal answer</td><td class="score-neg">−100</td><td>Host clicks LEFT on clicker</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout" style="margin-top:16px;">
+      <strong>Manual scoring (fastest finger) is the only time the host awards points.</strong> All other scoring is fully automatic — the host never needs to touch anything for a multiple choice round.
+    </div>
+  </section>
+
+  <!-- 10. OPERATOR -->
+  <section class="section">
+    <div class="section-eyebrow">10 — Operator</div>
+    <h2 class="section-title">The Host's Experience</h2>
+    <p>The host runs the entire show from one laptop using a single handheld wireless clicker:</p>
+    <ul>
+      <li><strong>Right click / forward</strong> — advance to next state (NEXT), or mark fastest-finger answer as <em>correct</em></li>
+      <li><strong>Left click / back</strong> — mark fastest-finger answer as <em>wrong</em></li>
+      <li>The laptop screen shows a private control panel: table connection status, answers received, current game state, and the leaderboard toggle</li>
+    </ul>
+    <div class="callout">
+      <strong>The host must never need to touch the keyboard during a live show.</strong> The system should be invisible — it just works. Reliability and simplicity come before every feature.
+    </div>
+  </section>
+
+  <!-- 11. VIDEO GENERATOR TOOL -->
+  <section class="section">
+    <div class="section-eyebrow">11 — Tooling</div>
+    <h2 class="section-title">Question Video Generator</h2>
+    <p>All question videos are prepared in advance by the host using a desktop tool called the <strong>Question Editor</strong> (<code>question_editor.py</code>). No video editing software is needed.</p>
+    <p>For each question, the host enters:</p>
+    <ul>
+      <li>Question type: Multiple Choice or Fastest Finger</li>
+      <li>Media type: Text, Photo, or Audio</li>
+      <li>The question text and (for MC) four answer options with the correct answer marked</li>
+      <li>Optional: a photo or audio file to embed in the video</li>
+      <li>Countdown duration (default 5 seconds, adjustable per question)</li>
+      <li>Background music and sound effects (intro jingle, countdown tick, timeout ding)</li>
+    </ul>
+    <p>The tool generates a fully animated MP4 video for each question — with all five segments, animated backgrounds, a countdown ring, confetti on the answer reveal, and any embedded media — and saves it directly to the correct folder.</p>
+    <p>Each generated video also produces a small <strong>sidecar metadata file</strong> (<code>.meta.json</code>) that tells the game player exactly when to pause for that specific video — so longer or shorter countdowns are handled automatically without any manual configuration.</p>
+    <div class="callout">
+      <strong>The developer should note:</strong> the game player (<code>video_player.py</code>) needs to be updated to read each video's <code>.meta.json</code> sidecar for its pause timestamps, rather than using the current global config timing values.
+    </div>
+  </section>
+
+</div>
