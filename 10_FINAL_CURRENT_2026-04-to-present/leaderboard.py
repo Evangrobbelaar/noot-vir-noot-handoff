@@ -5,6 +5,7 @@ Run as: python leaderboard.py
 """
 
 import os
+import re
 import sys
 import socket
 import threading
@@ -168,7 +169,7 @@ def _process_ipc_commands():
                                 t.score += points
                                 break
                     changed = True
-                log.info("Points applied: tables=%s pts=%+d", table_nums, points)
+                    log.info("Points applied: tables=%s pts=%+d", table_nums, points)
             except Exception as exc:
                 log.warning("Bad score command %r: %s", cmd, exc)
 
