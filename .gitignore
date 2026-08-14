@@ -5,3 +5,4 @@ __pycache__/
 *.db
 *.log
 .vscode/
+scores.json

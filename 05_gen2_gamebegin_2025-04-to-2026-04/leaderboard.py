@@ -2,10 +2,13 @@ import pygame
 import sys
 import math
 import os
+import json
 import win32pipe, win32file, pywintypes
 from threading import Thread
 from enum import Enum
 from typing import List, Optional
+
+SCORES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scores.json")
 
 class PositionChange(Enum):
     UP = "up"
@@ -63,8 +66,35 @@ class GameshowLeaderboard:
         # Game Data
         self.tables = [TableData(f"Table {i+1}") for i in range(12)]
         self.table_positions = []
+        self.load_scores()
 
         self.start_pipe_server()
+
+    def load_scores(self):
+        """Restore scores from disk so a restarted leaderboard resumes with
+        correct standings instead of zeros (see docs/proposals/nootvirnoot/
+        01-scoreboard-bug-investigation.md #6.1)."""
+        if not os.path.exists(SCORES_FILE):
+            return
+        try:
+            with open(SCORES_FILE, "r") as f:
+                saved = json.load(f)
+            for i, score in enumerate(saved.get("scores", [])):
+                if i < len(self.tables):
+                    self.tables[i].score = score
+            self.update_positions()
+            print(f"Restored scores from {SCORES_FILE}")
+        except Exception as e:
+            print(f"Could not load saved scores ({e}); starting from zero")
+
+    def save_scores(self):
+        """Persist current scores so a leaderboard restart doesn't reset the
+        board to zero."""
+        try:
+            with open(SCORES_FILE, "w") as f:
+                json.dump({"scores": [t.score for t in self.tables]}, f)
+        except Exception as e:
+            print(f"Could not save scores: {e}")
 
     def toggle_fullscreen(self):
         if self.is_fullscreen:
@@ -188,6 +218,7 @@ class GameshowLeaderboard:
         # Reset animation and update positions
         self.animation_progress[0] = 0
         self.update_positions()
+        self.save_scores()
 
     def update_answer(self, table_num: int, answer: str):
         if 0 < table_num <= len(self.tables) and answer in self.ANSWER_COLORS:
