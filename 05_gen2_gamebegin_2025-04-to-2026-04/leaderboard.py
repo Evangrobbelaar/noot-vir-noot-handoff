@@ -353,9 +353,12 @@ class GameshowLeaderboard:
                         # Window lost focus - ignore this to prevent minimization
                         pass
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        running = False
-                    elif event.key == pygame.K_f:  # Press F to toggle fullscreen
+                    # ESC-to-quit removed: an accidental keystroke on this
+                    # window during a live show used to kill the leaderboard
+                    # and lose its in-memory scores. Exit stays available via
+                    # the toggler's controlled shutdown path ('q' in
+                    # toggler.py / close_apps()).
+                    if event.key == pygame.K_f:  # Press F to toggle fullscreen
                         self.toggle_fullscreen()
             
             self.animation_progress[0] = min(1, self.animation_progress[0] + self.ANIMATION_SPEED)
