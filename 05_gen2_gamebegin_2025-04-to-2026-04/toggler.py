@@ -296,9 +296,36 @@ class SimpleToggler:
         print("Applications closed. Exiting.")
         os._exit(0)
 
+    def is_relevant_window_focused(self):
+        """Only act on hotkeys when one of our own windows (gameshow,
+        leaderboard, or the toggler's own console) has focus. keyboard.hook
+        is a global, OS-wide hook — without this guard, a stray 'l'/'b'/'q'
+        typed anywhere (another app, a browser, a chat window) during a live
+        show toggles displays or kills everything. Fails open (returns True)
+        if focus can't be determined, so a Win32 API hiccup never bricks the
+        toggler mid-show."""
+        try:
+            fg_hwnd = win32gui.GetForegroundWindow()
+        except Exception:
+            return True
+        if not fg_hwnd:
+            return True
+        if fg_hwnd in (self.gameshow_hwnd, self.leaderboard_hwnd):
+            return True
+        try:
+            if fg_hwnd == ctypes.windll.kernel32.GetConsoleWindow():
+                return True
+        except Exception:
+            pass
+        return False
+
     def handle_key_event(self, event):
-        """Handle global keyboard events"""
+        """Handle keyboard events, scoped to our own windows (see
+        is_relevant_window_focused) so the hook only fires as an in-show
+        control, not as a machine-wide hotkey."""
         if event.event_type == keyboard.KEY_DOWN:
+            if not self.is_relevant_window_focused():
+                return
             try:
                 if event.name == self.toggle_key or event.name == self.clicker_toggle_key:
                     self.toggle_visibility()
