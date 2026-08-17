@@ -9,12 +9,13 @@ import sys
 import json
 import time
 import subprocess
-import threading
 import tkinter as tk
 from tkinter import messagebox
 import logging
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [MAIN] %(levelname)s %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s [MAIN] %(levelname)s %(message)s"
+)
 log = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -34,6 +35,7 @@ DARK_FG = "#E0E0E0"
 # Auth dialog
 # ---------------------------------------------------------------------------
 
+
 def run_auth() -> bool:
     """Show password dialog. Returns True if authenticated."""
     correct_code = CONFIG["gameshow"]["access_code"]
@@ -47,11 +49,24 @@ def run_auth() -> bool:
     root.geometry("360x180")
     root.eval("tk::PlaceWindow . center")
 
-    tk.Label(root, text="Enter Access Code", font=("Arial", 14, "bold"),
-             bg=DARK_BG, fg=DARK_FG).pack(pady=(24, 8))
+    tk.Label(
+        root,
+        text="Enter Access Code",
+        font=("Arial", 14, "bold"),
+        bg=DARK_BG,
+        fg=DARK_FG,
+    ).pack(pady=(24, 8))
 
-    entry = tk.Entry(root, show="*", font=("Arial", 14), bg="#2A2A2A", fg=DARK_FG,
-                     insertbackground=DARK_FG, justify="center", relief=tk.FLAT)
+    entry = tk.Entry(
+        root,
+        show="*",
+        font=("Arial", 14),
+        bg="#2A2A2A",
+        fg=DARK_FG,
+        insertbackground=DARK_FG,
+        justify="center",
+        relief=tk.FLAT,
+    )
     entry.pack(padx=40, fill=tk.X)
     entry.focus_set()
 
@@ -69,13 +84,24 @@ def run_auth() -> bool:
                 messagebox.showerror("Access Denied", "Too many failed attempts.")
                 root.destroy()
             else:
-                err_lbl.config(text=f"Incorrect code. {remaining} attempt(s) remaining.")
+                err_lbl.config(
+                    text=f"Incorrect code. {remaining} attempt(s) remaining."
+                )
                 entry.delete(0, tk.END)
 
-    btn = tk.Button(root, text="Enter", command=attempt,
-                    bg="#1565C0", fg=DARK_FG, relief=tk.FLAT,
-                    activebackground="#1976D2", activeforeground=DARK_FG,
-                    font=("Arial", 12), padx=20, pady=6)
+    btn = tk.Button(
+        root,
+        text="Enter",
+        command=attempt,
+        bg="#1565C0",
+        fg=DARK_FG,
+        relief=tk.FLAT,
+        activebackground="#1976D2",
+        activeforeground=DARK_FG,
+        font=("Arial", 12),
+        padx=20,
+        pady=6,
+    )
     btn.pack(pady=8)
     entry.bind("<Return>", lambda e: attempt())
 
@@ -86,6 +112,7 @@ def run_auth() -> bool:
 # ---------------------------------------------------------------------------
 # Pre-launch checklist
 # ---------------------------------------------------------------------------
+
 
 def run_checklist() -> bool:
     """Show checklist dialog. Returns True if user clicked Launch."""
@@ -98,8 +125,13 @@ def run_checklist() -> bool:
     root.geometry("480x280")
     root.eval("tk::PlaceWindow . center")
 
-    tk.Label(root, text="Pre-Launch Checklist", font=("Arial", 14, "bold"),
-             bg=DARK_BG, fg=DARK_FG).pack(pady=(20, 12))
+    tk.Label(
+        root,
+        text="Pre-Launch Checklist",
+        font=("Arial", 14, "bold"),
+        bg=DARK_BG,
+        fg=DARK_FG,
+    ).pack(pady=(20, 12))
 
     checks = [
         tk.BooleanVar(),
@@ -122,9 +154,15 @@ def run_checklist() -> bool:
 
     for var, text in zip(checks, labels):
         cb = tk.Checkbutton(
-            root, text=text, variable=var, bg=DARK_BG, fg=DARK_FG,
-            activebackground=DARK_BG, selectcolor="#333",
-            font=("Arial", 10), command=on_check
+            root,
+            text=text,
+            variable=var,
+            bg=DARK_BG,
+            fg=DARK_FG,
+            activebackground=DARK_BG,
+            selectcolor="#333",
+            font=("Arial", 10),
+            command=on_check,
         )
         cb.pack(anchor="w", padx=24, pady=2)
 
@@ -133,9 +171,16 @@ def run_checklist() -> bool:
         root.destroy()
 
     launch_btn = tk.Button(
-        root, text="Launch", command=do_launch,
-        bg="#333", fg=DARK_FG, relief=tk.FLAT, state=tk.DISABLED,
-        font=("Arial", 12, "bold"), padx=20, pady=8
+        root,
+        text="Launch",
+        command=do_launch,
+        bg="#333",
+        fg=DARK_FG,
+        relief=tk.FLAT,
+        state=tk.DISABLED,
+        font=("Arial", 12, "bold"),
+        padx=20,
+        pady=8,
     )
     launch_btn.pack(pady=16)
 
@@ -148,6 +193,7 @@ def run_checklist() -> bool:
 # ---------------------------------------------------------------------------
 
 showing_gameshow = True
+
 
 def _find_window_by_title(title_substr: str):
     """Find window handle containing title_substr. Returns hwnd or None."""
@@ -170,6 +216,7 @@ def _show_window(hwnd):
     try:
         import win32gui
         import win32con
+
         win32gui.ShowWindow(hwnd, win32con.SW_SHOW)
         win32gui.BringWindowToTop(hwnd)
         win32gui.SetForegroundWindow(hwnd)
@@ -181,9 +228,37 @@ def _hide_window(hwnd):
     try:
         import win32gui
         import win32con
+
         win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
     except Exception as exc:
         log.warning("HideWindow error: %s", exc)
+
+
+def _is_relevant_window_focused(gs_hwnd, lb_hwnd):
+    """Only act on hotkeys when the gameshow window, leaderboard window, or
+    this launcher's own console has focus. keyboard.add_hotkey is a global,
+    OS-wide hook — without this guard, a stray keystroke typed anywhere else
+    (another app, a browser, a chat window) while the show is running would
+    toggle displays or kill everything. Fails open (returns True) if focus
+    can't be determined, so a Win32 API hiccup never locks out the hotkeys
+    mid-show."""
+    try:
+        import win32gui
+        import ctypes
+
+        fg_hwnd = win32gui.GetForegroundWindow()
+        if not fg_hwnd:
+            return True
+        if fg_hwnd in (gs_hwnd, lb_hwnd):
+            return True
+        try:
+            if fg_hwnd == ctypes.windll.kernel32.GetConsoleWindow():
+                return True
+        except Exception:
+            pass
+        return False
+    except Exception:
+        return True
 
 
 def _setup_toggle_key(toggle_key: str):
@@ -196,6 +271,9 @@ def _setup_toggle_key(toggle_key: str):
             global showing_gameshow
             gs_hwnd = _find_window_by_title(GAMESHOW_TITLE)
             lb_hwnd = _find_window_by_title(LEADERBOARD_TITLE)
+
+            if not _is_relevant_window_focused(gs_hwnd, lb_hwnd):
+                return
 
             if showing_gameshow:
                 if gs_hwnd:
@@ -225,6 +303,11 @@ def _setup_quit_key(procs: list[subprocess.Popen]):
         import keyboard
 
         def on_quit():
+            gs_hwnd = _find_window_by_title(GAMESHOW_TITLE)
+            lb_hwnd = _find_window_by_title(LEADERBOARD_TITLE)
+            if not _is_relevant_window_focused(gs_hwnd, lb_hwnd):
+                return
+
             log.info("Quit key pressed — terminating subprocesses")
             for p in procs:
                 try:
@@ -241,6 +324,7 @@ def _setup_quit_key(procs: list[subprocess.Popen]):
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main():
     # Auth

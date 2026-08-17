@@ -74,6 +74,39 @@ class TableEntry:
 tables: list[TableEntry] = [TableEntry(i + 1) for i in range(MAX_TABLES)]
 
 # ---------------------------------------------------------------------------
+# Score persistence
+# ---------------------------------------------------------------------------
+SCORES_FILE = os.path.join(os.path.dirname(__file__), "scores.json")
+
+
+def _load_scores():
+    """Restore scores from disk so a crash/relaunch mid-show resumes with
+    correct standings instead of zeros."""
+    if not os.path.exists(SCORES_FILE):
+        return
+    try:
+        with open(SCORES_FILE) as f:
+            saved = json.load(f)
+        for t in tables:
+            if str(t.number) in saved:
+                t.score = saved[str(t.number)]
+        _recalculate_ranks()
+        log.info("Restored scores from %s", SCORES_FILE)
+    except Exception as exc:
+        log.warning("Could not load saved scores (%s); starting from zero", exc)
+
+
+def _save_scores():
+    try:
+        with open(SCORES_FILE, "w") as f:
+            json.dump({str(t.number): t.score for t in tables}, f)
+    except Exception as exc:
+        log.warning("Could not save scores: %s", exc)
+
+
+_load_scores()
+
+# ---------------------------------------------------------------------------
 # IPC server (receives from video_player/GameServer)
 # ---------------------------------------------------------------------------
 
@@ -170,6 +203,7 @@ def _process_ipc_commands():
                                 break
                     changed = True
                     log.info("Points applied: tables=%s pts=%+d", table_nums, points)
+                    _save_scores()
             except Exception as exc:
                 log.warning("Bad score command %r: %s", cmd, exc)
 
@@ -303,9 +337,10 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    running = False
-                elif event.key == pygame.K_f:
+                # ESC-to-quit removed: an accidental keystroke on this window
+                # during a live show used to kill the leaderboard outright.
+                # Exit stays available via main.py's controlled quit key.
+                if event.key == pygame.K_f:
                     fullscreen = not fullscreen
                     if fullscreen:
                         screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
