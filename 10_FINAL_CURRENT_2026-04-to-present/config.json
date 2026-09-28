@@ -23,10 +23,10 @@
     "ws_port": 8083
   },
   "timing": {
-    "mc_pause1_ms": 2000,
-    "mc_pause2_ms": 5000,
-    "mc_pause3_ms": 10000,
-    "ff_pause1_ms": 2000,
-    "ff_pause2_ms": 5000
+    "mc_pause1_ms": 5000,
+    "mc_pause2_ms": 10000,
+    "mc_pause3_ms": 20000,
+    "ff_pause1_ms": 5000,
+    "ff_pause2_ms": 20000
   }
 }

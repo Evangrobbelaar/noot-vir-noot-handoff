@@ -354,12 +354,17 @@ class GameshowApp:
         pauses = self._load_meta_pauses(self.current_video)
         if not pauses:
             t = self.config.get("timing", {})
+            # Matches the fixed schedule gen2 through gen5 hardcoded directly
+            # into the player (5/10/20s MC, 5/20s FF) — the schedule the
+            # existing ~500-video library (gamebegin/ + gameshowold/) was
+            # actually authored against, before config.json or .meta.json
+            # existed. Only used if config.json is missing these keys.
             defaults = {
                 "mc_pause1_ms": 5000,
-                "mc_pause2_ms": 12000,
-                "mc_pause3_ms": 50000,
+                "mc_pause2_ms": 10000,
+                "mc_pause3_ms": 20000,
                 "ff_pause1_ms": 5000,
-                "ff_pause2_ms": 12000,
+                "ff_pause2_ms": 20000,
             }
             t = {**defaults, **t}
             if self.current_video.is_f_prefix:
@@ -826,10 +831,10 @@ class ControlPanel(tk.Toplevel):
 
         _t = CONFIG.get("timing", {})
         self._mc_p1_var = tk.StringVar(value=str(_t.get("mc_pause1_ms", 5000)))
-        self._mc_p2_var = tk.StringVar(value=str(_t.get("mc_pause2_ms", 12000)))
-        self._mc_p3_var = tk.StringVar(value=str(_t.get("mc_pause3_ms", 50000)))
+        self._mc_p2_var = tk.StringVar(value=str(_t.get("mc_pause2_ms", 10000)))
+        self._mc_p3_var = tk.StringVar(value=str(_t.get("mc_pause3_ms", 20000)))
         self._ff_p1_var = tk.StringVar(value=str(_t.get("ff_pause1_ms", 5000)))
-        self._ff_p2_var = tk.StringVar(value=str(_t.get("ff_pause2_ms", 12000)))
+        self._ff_p2_var = tk.StringVar(value=str(_t.get("ff_pause2_ms", 20000)))
 
         self._table_toggle_vars: dict[int, bool] = {}
         self._table_toggle_btns: dict[int, tk.Button] = {}
