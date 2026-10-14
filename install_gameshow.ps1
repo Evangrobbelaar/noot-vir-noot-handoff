@@ -96,10 +96,36 @@ function Install-Gameshow {
 
     # 4. The gameshow software (downloaded from GitHub; no git needed)
     Step 4 "Laai die gameshow sagteware af"
-    $zip = Join-Path $tmp "code.zip"
-    Download "https://github.com/$Repo/archive/refs/heads/$Branch.zip" $zip
-    Expand-Archive $zip -DestinationPath $tmp -Force -ErrorAction Stop
-    $src = Get-ChildItem $tmp -Directory | ForEach-Object { Join-Path $_.FullName $AppDir } | Where-Object { Test-Path $_ } | Select-Object -First 1
+    # Only the gameshow folder (~0.3 MB), file by file, pinned to one commit.
+    # Falls back to the whole project zip (~42 MB) if GitHub's file list is unavailable.
+    $src = $null
+    try {
+        $commit = (Invoke-RestMethod "https://api.github.com/repos/$Repo/branches/$Branch" -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop).commit.sha
+        $tree = Invoke-RestMethod "https://api.github.com/repos/$Repo/git/trees/$($commit)?recursive=1" -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop
+        $files = @($tree.tree | Where-Object { $_.type -eq "blob" -and $_.path.StartsWith("$AppDir/") })
+        if ($files.Count -gt 0) {
+            $app = Join-Path $tmp "app"
+            $i = 0
+            foreach ($f in $files) {
+                $i++
+                $rel = $f.path.Substring($AppDir.Length + 1)
+                Info "[$i/$($files.Count)] $rel"
+                $out = Join-Path $app ($rel -replace "/", "\")
+                New-Item -ItemType Directory -Force (Split-Path $out) | Out-Null
+                Download "https://raw.githubusercontent.com/$Repo/$commit/$($f.path)" $out
+            }
+            $src = $app
+        }
+    } catch {
+        if ("$_" -like "Kon nie aflaai nie*") { throw }
+    }
+    if (-not $src) {
+        Info "laai die hele projek af (42 MB - kan 'n paar minute vat, wag asseblief)..."
+        $zip = Join-Path $tmp "code.zip"
+        Download "https://github.com/$Repo/archive/refs/heads/$Branch.zip" $zip
+        Expand-Archive $zip -DestinationPath $tmp -Force -ErrorAction Stop
+        $src = Get-ChildItem $tmp -Directory | ForEach-Object { Join-Path $_.FullName $AppDir } | Where-Object { Test-Path $_ } | Select-Object -First 1
+    }
     if (-not $src) { Fail "Gameshow sagteware nie in die aflaai gevind nie." }
     New-Item -ItemType Directory -Force $Dest -ErrorAction Stop | Out-Null
     # Copy the software; never overwrite the videos (vid\) or the saved scores (scores.json)
