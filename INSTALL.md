@@ -4,14 +4,30 @@ Works on any Windows 10/11 laptop. No coding tools needed.
 
 ## 1. Install the software (one command)
 
-Open **PowerShell** (Start menu, type `PowerShell`, press Enter) and paste:
+1. Open **PowerShell** (Start menu, type `PowerShell`, press Enter). Normal or
+   Administrator both work.
+2. Copy **only this one line**, right-click in the PowerShell window to paste it,
+   and press Enter:
 
 ```powershell
 irm https://raw.githubusercontent.com/Evangrobbelaar/noot-vir-noot-handoff/gameshow-final/install_gameshow.ps1 | iex
 ```
 
+Do **not** paste anything else (no `PS C:\...>` text, no lines from the script).
+The installer shows 8 steps with a green `OK` each and ends with **KLAAR!**.
+If a step fails it prints a red `FOUT:` message: take a photo of the screen.
+
+If that line gives an error before step 1 starts, use this one instead (it saves
+the installer to a file first and runs it from there):
+
+```powershell
+irm https://raw.githubusercontent.com/Evangrobbelaar/noot-vir-noot-handoff/gameshow-final/install_gameshow.ps1 -OutFile $env:TEMP\install_gameshow.ps1; powershell -NoProfile -ExecutionPolicy Bypass -File $env:TEMP\install_gameshow.ps1
+```
+
 It installs Python 3.12, VLC (64-bit), the gameshow and everything it needs into
-`%USERPROFILE%\Gameshow`, and puts three shortcuts on the desktop:
+`%USERPROFILE%\Gameshow`, and puts three shortcuts on the desktop. If winget
+(Windows' app installer) doesn't work on the laptop, it downloads Python and VLC
+directly from python.org and videolan.org instead.
 
 | Shortcut | What it does |
 | --- | --- |
