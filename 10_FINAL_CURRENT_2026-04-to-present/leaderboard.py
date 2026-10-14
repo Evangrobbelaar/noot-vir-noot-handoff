@@ -104,8 +104,6 @@ def _save_scores():
         log.warning("Could not save scores: %s", exc)
 
 
-_load_scores()
-
 # ---------------------------------------------------------------------------
 # IPC server (receives from video_player/GameServer)
 # ---------------------------------------------------------------------------
@@ -219,6 +217,10 @@ def _recalculate_ranks():
     for new_rank, t in enumerate(sorted_tables):
         t.prev_rank = t.rank
         t.rank = new_rank
+
+
+# Must run after _recalculate_ranks exists (it re-sorts the restored scores)
+_load_scores()
 
 
 # ---------------------------------------------------------------------------

@@ -9,6 +9,7 @@ import sys
 import json
 import queue
 import threading
+import time
 import logging
 import tkinter as tk
 from tkinter import scrolledtext, messagebox
@@ -48,6 +49,25 @@ VIDEO_FOLDER = os.path.join(
     os.path.dirname(__file__), CONFIG["gameshow"]["video_folder"]
 )
 
+# Precise pausing: arm a timer once the pause point is this close (VLC's time
+# reports arrive every ~250 ms, so this always catches at least two of them).
+PRECISE_PAUSE_LOOKAHEAD_MS = 600
+# How long VLC takes to actually freeze after set_pause(1); the timer fires
+# this much early to compensate. Measured with player_test_precise.py.
+PAUSE_LATENCY_MS = 0
+# A VLC pause within this much of the end of the media means the video ended.
+END_MARGIN_MS = 500
+
+if sys.platform == "win32":
+    # Windows timers default to ~16 ms steps; ask for 1 ms so the pause
+    # timer lands within a frame.
+    try:
+        import ctypes
+
+        ctypes.windll.winmm.timeBeginPeriod(1)
+    except Exception:  # noqa: BLE001
+        pass
+
 
 # ---------------------------------------------------------------------------
 # Network helpers
@@ -81,6 +101,20 @@ class State(Enum):
 # ---------------------------------------------------------------------------
 # Video file entry
 # ---------------------------------------------------------------------------
+def _show_order(folder: str) -> list[str]:
+    """Play order of the .mp4 files in a folder: newest 'last modified' first.
+
+    Same rule as gameshow2.py, so the playlist sorter (sort22.py) sets the show
+    order, and it matches VS Code's explorer with explorer.sortOrder = modified.
+    Equal times fall back to the filename so the order is always repeatable.
+    """
+    files = [f for f in os.listdir(folder) if f.lower().endswith(".mp4")]
+    return sorted(
+        files,
+        key=lambda f: (-os.path.getmtime(os.path.join(folder, f)), f.lower()),
+    )
+
+
 class VideoEntry:
     def __init__(self, path: str, filename: str):
         self.path = path
@@ -132,6 +166,8 @@ class GameshowApp:
 
         # Pause state (reset per video)
         self.pauses_triggered = 0  # how many pauses have fired this video
+        self._pause_timer = None  # Tk after-id of the armed precise pause, if any
+        self._end_handled = False  # end-of-video already processed
         self.at_video_end = False  # holding at end, waiting for NEXT
         self.answer_awarded = False  # MC auto-award already fired this video
 
@@ -197,6 +233,9 @@ class GameshowApp:
         em = self.media_player.event_manager()
         em.event_attach(vlc.EventType.MediaPlayerTimeChanged, self._on_time_changed_vlc)
         em.event_attach(vlc.EventType.MediaPlayerEndReached, self._on_media_end_vlc)
+        # With --play-and-pause VLC freezes on the last frame instead of
+        # ending, and MediaPlayerEndReached never fires — detect that pause.
+        em.event_attach(vlc.EventType.MediaPlayerPaused, self._on_paused_vlc)
         self._vlc_events_attached = True
 
     # ------------------------------------------------------------------
@@ -218,23 +257,21 @@ class GameshowApp:
 
         # VRAE videos
         if os.path.isdir(vrae_dir):
-            files = sorted(
-                f for f in os.listdir(vrae_dir) if f.lower().endswith(".mp4")
-            )
+            files = _show_order(vrae_dir)
             self.vrae_videos = [VideoEntry(os.path.join(vrae_dir, f), f) for f in files]
             log.info("Loaded %d VRAE videos", len(self.vrae_videos))
+            log.info("VRAE play order: %s", ", ".join(files))
         else:
             log.warning("vid/vrae/ folder not found")
 
         # Countdown videos
         if os.path.isdir(countdown_dir):
-            files = sorted(
-                f for f in os.listdir(countdown_dir) if f.lower().endswith(".mp4")
-            )
+            files = _show_order(countdown_dir)
             self.countdown_videos = [
                 VideoEntry(os.path.join(countdown_dir, f), f) for f in files
             ]
             log.info("Loaded %d countdown videos", len(self.countdown_videos))
+            log.info("Countdown play order: %s", ", ".join(files))
         else:
             log.warning("vid/countdown/ folder not found")
 
@@ -273,8 +310,12 @@ class GameshowApp:
     # ------------------------------------------------------------------
 
     def _reset_pause_flags(self):
+        if self._pause_timer is not None:
+            self.root.after_cancel(self._pause_timer)
+            self._pause_timer = None
         self.pauses_triggered = 0
         self.at_video_end = False
+        self._end_handled = False
         self.answer_awarded = False
         self.answer_sent_this_video = False
 
@@ -304,10 +345,20 @@ class GameshowApp:
     def _on_time_changed_vlc(self, event):
         """VLC fires this on its own thread. Bridge to Tk main thread."""
         current_ms = self.media_player.get_time()
-        self.root.after(0, lambda ms=current_ms: self._on_time_changed(ms))
+        seen = time.perf_counter()
+        self.root.after(0, lambda ms=current_ms, t=seen: self._on_time_changed(ms, t))
 
     def _on_media_end_vlc(self, event):
         self.root.after(0, self._on_media_end)
+
+    def _on_paused_vlc(self, event):
+        self.root.after(0, self._on_paused)
+
+    def _on_paused(self):
+        """VLC paused itself on the last frame (--play-and-pause) = video ended."""
+        length = self.media_player.get_length()
+        if length > 0 and self.media_player.get_time() >= length - END_MARGIN_MS:
+            self._on_media_end()
 
     # ------------------------------------------------------------------
     # Pause timing helpers
@@ -352,7 +403,9 @@ class GameshowApp:
             return self._pause_cache[path]
 
         pauses = self._load_meta_pauses(self.current_video)
+        source = ".meta.json"
         if not pauses:
+            source = "DEFAULT timing (no .meta.json found)"
             t = self.config.get("timing", {})
             # Matches the fixed schedule gen2 through gen5 hardcoded directly
             # into the player (5/10/20s MC, 5/20s FF) — the schedule the
@@ -373,6 +426,14 @@ class GameshowApp:
                 pauses = [t["mc_pause1_ms"], t["mc_pause2_ms"], t["mc_pause3_ms"]]
 
         self._pause_cache[path] = pauses
+        # Show the operator where this video's pause times came from
+        msg = f"Pauses for {self.current_video.filename}: {pauses} ms — from {source}"
+        log.info(msg)
+        if self.control_panel:
+            try:
+                self.control_panel._log(msg)
+            except tk.TclError:
+                pass  # control panel window was closed
         return pauses
 
     def _on_pause_triggered(self, pause_num: int):
@@ -448,28 +509,52 @@ class GameshowApp:
     # Time-changed handler (runs on main thread)
     # ------------------------------------------------------------------
 
-    def _on_time_changed(self, current_ms: int):
+    def _on_time_changed(self, current_ms: int, seen: float | None = None):
         if self.state == State.INTRO:
             return
         if self.current_video and self.current_video.is_q_type:
             return
         if self.at_video_end:
             return
+        if self._pause_timer is not None:
+            return  # precise pause already armed
 
         pause_times = self._get_pause_times()
         if self.pauses_triggered >= len(pause_times):
             return
 
-        if current_ms >= pause_times[self.pauses_triggered]:
-            self.pauses_triggered += 1
-            self.media_player.pause()
-            self._on_pause_triggered(self.pauses_triggered)
+        # VLC only reports the playback time about 4x per second, so waiting
+        # for a report past the pause time stops up to ~0.45 s late (the next
+        # phase flashes, or the old one replays after NEXT). Instead, estimate
+        # the real position now and arm a timer for the exact pause moment.
+        now_ms = current_ms
+        if seen is not None:
+            now_ms += (time.perf_counter() - seen) * 1000
+        remaining = pause_times[self.pauses_triggered] - now_ms
+        if remaining <= 0:
+            self._fire_pause()
+        elif remaining <= PRECISE_PAUSE_LOOKAHEAD_MS:
+            self._pause_timer = self.root.after(
+                max(1, int(remaining - PAUSE_LATENCY_MS)), self._fire_pause
+            )
+
+    def _fire_pause(self):
+        """Pause now (called by the precise timer or a late time report)."""
+        self._pause_timer = None
+        if self.at_video_end or self.pauses_triggered >= len(self._get_pause_times()):
+            return
+        self.pauses_triggered += 1
+        self.media_player.set_pause(1)
+        self._on_pause_triggered(self.pauses_triggered)
 
     # ------------------------------------------------------------------
     # Media end handler (runs on main thread)
     # ------------------------------------------------------------------
 
     def _on_media_end(self):
+        if self._end_handled:
+            return  # already handled via the end-of-video pause
+        self._end_handled = True
         log.info("Media ended. State=%s", self.state)
 
         if self.state == State.INTRO:

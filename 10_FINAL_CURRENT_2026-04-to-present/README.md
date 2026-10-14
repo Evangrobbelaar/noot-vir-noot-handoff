@@ -54,6 +54,16 @@ vid/
     countdown1.mp4
 ```
 
+**Play order:** videos in `vrae/` and `countdown/` play **newest "last modified" first**
+(same as the old `gameshow2.py`). Set the order with `sort22.py` (Video Playlist Metadata
+Sorter, "Reverse order" ticked = first in the list plays first); VS Code with
+`"explorer.sortOrder": "modified"` shows the same order. The control panel log lists the
+play order when the show starts.
+
+**Pause timing:** each video can have a `<name>.meta.json` next to it,
+`{"mode": "MC", "pause_ms": [..]}`, with the exact pause times (the log says
+"from .meta.json" or "DEFAULT timing" per video).
+
 **Filename prefix rules:**
 
 | Prefix | Effect |
