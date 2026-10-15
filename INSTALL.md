@@ -41,7 +41,7 @@ Running the same command again **updates** the software and keeps the videos and
 ## 2. Add the videos
 
 The videos are not part of the installer. Unzip the show's video zip and copy its
-`vrae`, `countdown` and `visual` folders into **Gameshow Videos**.
+`vrae`, `countdown`, `visual` and `dance` folders into **Gameshow Videos**.
 
 The play order is stored in each video's *last modified* time: copy the folders as
 they are (Explorer copy or unzip both keep it). Check the order in the control
@@ -60,6 +60,7 @@ panel's log when the show starts.
 Double-click **Gameshow**, enter `00000`, tick the checklist, click **Launch**.
 
 - **NEXT**: clicker forward / PageDown
-- **L**: switch between show and scoreboard (show screen must be in front)
+- **L**: switch between show and scoreboard (works from any window)
+- **M**: dance video (between questions); NEXT carries on with the show
 - Fastest finger: in the control panel, select the first buzzer under *Manual Points*, click + or -
 - Use **Win + P -> Duplicate** so the projector shows the same picture as the laptop

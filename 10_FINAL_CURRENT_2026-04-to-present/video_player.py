@@ -96,6 +96,7 @@ class State(Enum):
     WAITING_TO_START = auto()
     PLAYING = auto()
     COUNTDOWN = auto()
+    DANCE = auto()  # dance video (key M) — the show resumes on NEXT
 
 
 # ---------------------------------------------------------------------------
@@ -153,6 +154,12 @@ class GameshowApp:
         self.countdown_videos: list[VideoEntry] = []
         self.vrae_index = 0
         self.countdown_index = 0
+
+        # Dance videos (vid/dance/, key M): played one after the other, each
+        # once; _dance_return remembers where the show was so NEXT carries on
+        self.dance_videos: list[VideoEntry] = []
+        self.dance_index = 0
+        self._dance_return: dict | None = None
 
         # Per-video pause timestamps, cached once per video path so the
         # .meta.json sidecar (if any) is only read from disk once instead
@@ -274,6 +281,16 @@ class GameshowApp:
             log.info("Countdown play order: %s", ", ".join(files))
         else:
             log.warning("vid/countdown/ folder not found")
+
+        # Dance videos (optional) — played in filename order: 1_..., 2_...
+        dance_dir = os.path.join(VIDEO_FOLDER, "dance")
+        if os.path.isdir(dance_dir):
+            files = sorted(
+                (f for f in os.listdir(dance_dir) if f.lower().endswith(".mp4")),
+                key=str.lower,
+            )
+            self.dance_videos = [VideoEntry(os.path.join(dance_dir, f), f) for f in files]
+            log.info("Dance videos (key M): %s", ", ".join(files) or "none")
 
     # ------------------------------------------------------------------
     # Screen helpers
@@ -510,7 +527,7 @@ class GameshowApp:
     # ------------------------------------------------------------------
 
     def _on_time_changed(self, current_ms: int, seen: float | None = None):
-        if self.state == State.INTRO:
+        if self.state in (State.INTRO, State.DANCE):
             return
         if self.current_video and self.current_video.is_q_type:
             return
@@ -556,6 +573,12 @@ class GameshowApp:
             return  # already handled via the end-of-video pause
         self._end_handled = True
         log.info("Media ended. State=%s", self.state)
+
+        if self.state == State.DANCE:
+            # Hold on the dance video's last frame until NEXT
+            if self.control_panel:
+                self.control_panel.update_status("Dance done — press NEXT to carry on with the show")
+            return
 
         if self.state == State.INTRO:
             self.server.stop_dance()
@@ -620,6 +643,10 @@ class GameshowApp:
     # ------------------------------------------------------------------
 
     def handle_next(self, _event=None):
+        if self.state == State.DANCE:
+            self._end_dance()
+            return
+
         if self.state == State.LANDING:
             self.state = State.INTRO
             self.server.start_dance()
@@ -691,11 +718,113 @@ class GameshowApp:
                 self.control_panel.update_status(msg)
 
     # ------------------------------------------------------------------
+    # Dance videos (key M)
+    # ------------------------------------------------------------------
+
+    def play_dance(self, event=None):
+        """M: play the next dance video, then carry on with the show on NEXT.
+
+        Only while the show is waiting for NEXT and no buttons are armed
+        (before the intro, 'Ready to Start', a question's first pause, or the
+        end of a question) so a dance can never interfere with scoring.
+        """
+        if event is not None and isinstance(event.widget, (tk.Entry, tk.Spinbox, tk.Text)):
+            return  # typing in a control-panel field
+        if self.state == State.DANCE:
+            return
+        if self.dance_index >= len(self.dance_videos):
+            msg = "M: no more dance videos (all played)" if self.dance_videos else \
+                "M: no dance videos in vid/dance/"
+            log.info(msg)
+            if self.control_panel:
+                self.control_panel._log(msg)
+            return
+        ctx = self._dance_context()
+        if ctx is None:
+            msg = ("M: dance only between questions — wait until the video stops "
+                   "(first pause or end of the question), then press M")
+            log.info(msg)
+            if self.control_panel:
+                self.control_panel._log(msg)
+            return
+        entry = self.dance_videos[self.dance_index]
+        self.dance_index += 1
+        self._dance_return = ctx
+        self.state = State.DANCE
+        log.info("Dance %d/%d: %s (show was: %s)", self.dance_index,
+                 len(self.dance_videos), entry.filename, ctx["kind"])
+        self._play_video(entry)
+        if self.control_panel:
+            self.control_panel.update_status(
+                f"DANCE {self.dance_index}/{len(self.dance_videos)} — NEXT carries on with the show"
+            )
+
+    def _dance_context(self) -> dict | None:
+        """Where the show is now, if it is a safe moment for a dance."""
+        if self.state in (State.LANDING, State.WAITING_TO_START):
+            return {"kind": "screen", "state": self.state}
+        if self.state not in (State.PLAYING, State.COUNTDOWN) or not self.current_video:
+            return None
+        if self.at_video_end:
+            return {"kind": "end", "state": self.state, "video": self.current_video}
+        paused = self.media_player.get_state() == vlc.State.Paused
+        if self.pauses_triggered == 1 and self._pause_timer is None and paused and not self._end_handled:
+            return {"kind": "pause1", "state": self.state, "video": self.current_video,
+                    "time_ms": max(0, self.media_player.get_time())}
+        return None
+
+    def _end_dance(self):
+        """NEXT after (or during) a dance: put the show back and do what NEXT
+        would have done at that moment."""
+        ctx, self._dance_return = self._dance_return, None
+        log.info("Dance finished — carrying on with the show (%s)", ctx["kind"] if ctx else "?")
+        if not ctx:
+            self.state = State.WAITING_TO_START
+            self.media_player.stop()
+            self._show_waiting_screen()
+            return
+        self.state = ctx["state"]
+        if ctx["kind"] == "screen":
+            self.media_player.stop()
+            self._reset_pause_flags()
+            self.current_video = None
+            if self.state == State.LANDING:
+                self._show_landing_screen()
+            else:
+                self._show_waiting_screen()
+            self.handle_next()
+            return
+        entry = ctx["video"]
+        if ctx["kind"] == "end":
+            self._reset_pause_flags()
+            self.current_video = entry
+            self.current_answer = entry.correct_answer
+            self.at_video_end = True
+            self.handle_next()  # -> next question, exactly as before the dance
+            return
+        # kind == "pause1": back into the same question at its first pause,
+        # then NEXT's pause-1 action (arm buttons, show the question)
+        self._reset_pause_flags()
+        self.current_video = entry
+        self.current_answer = entry.correct_answer
+        self.pauses_triggered = 1
+        self._clear_frame()
+        media = self.vlc_instance.media_new(entry.path)
+        media.add_option(f":start-time={ctx['time_ms'] / 1000:.3f}")
+        self.media_player.set_media(media)
+        self.media_player.play()
+        if self.control_panel:
+            self.control_panel.update_video_label(entry.filename)
+        self.handle_next()
+
+    # ------------------------------------------------------------------
     # Keyboard
     # ------------------------------------------------------------------
 
     def _setup_keyboard(self):
         """Bind keyboard shortcuts in Tkinter and pynput for global PageDown."""
+        for key in ("<m>", "<M>"):
+            self.root.bind(key, self.play_dance)
         for key in (
             "<n>",
             "<Down>",
@@ -713,9 +842,25 @@ class GameshowApp:
         try:
             from pynput import keyboard as pynput_kb
 
+            def our_window_in_front() -> bool:
+                """True if the show / control panel has focus — Tk's own <n>
+                binding handles the key there, so it must not fire twice."""
+                try:
+                    import ctypes
+
+                    u32 = ctypes.windll.user32
+                    pid = ctypes.c_ulong()
+                    u32.GetWindowThreadProcessId(u32.GetForegroundWindow(), ctypes.byref(pid))
+                    return pid.value == os.getpid()
+                except Exception:
+                    return False
+
             def on_press(key):
                 try:
                     if key == pynput_kb.Key.page_down:
+                        self.root.after(0, self.handle_next)
+                    elif getattr(key, "char", None) in ("n", "N") and not our_window_in_front():
+                        # N works whichever window is in front (scoreboard, other apps)
                         self.root.after(0, self.handle_next)
                 except Exception:
                     pass
@@ -804,6 +949,7 @@ STATE_COLOURS = {
     "WAITING_TO_START": "#58A6FF",
     "PLAYING": "#3FB950",
     "COUNTDOWN": "#FF7B72",
+    "DANCE": "#D2A8FF",
 }
 
 
@@ -903,6 +1049,8 @@ class ControlPanel(tk.Toplevel):
         self.bind("<Next>", app.handle_next)
         self.bind("<space>", app.handle_next)
         self.bind("<Return>", app.handle_next)
+        self.bind("<m>", app.play_dance)
+        self.bind("<M>", app.play_dance)
 
         self._correct_answer_var = tk.StringVar(value="")
         self._correct_pts_var = tk.StringVar(

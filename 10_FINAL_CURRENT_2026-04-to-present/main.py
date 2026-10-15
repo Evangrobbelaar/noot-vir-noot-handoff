@@ -271,9 +271,9 @@ def _setup_toggle_key(toggle_key: str):
             global showing_gameshow
             gs_hwnd = _find_window_by_title(GAMESHOW_TITLE)
             lb_hwnd = _find_window_by_title(LEADERBOARD_TITLE)
-
-            if not _is_relevant_window_focused(gs_hwnd, lb_hwnd):
-                return
+            # The toggle works whichever window is in front (control panel,
+            # another app...) so the operator never has to click the show
+            # first. Only the quit key keeps the focus guard.
 
             if showing_gameshow:
                 if gs_hwnd:

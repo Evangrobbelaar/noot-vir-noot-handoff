@@ -131,7 +131,7 @@ function Install-Gameshow {
     # Copy the software; never overwrite the videos (vid\) or the saved scores (scores.json)
     Get-ChildItem $src -Force | Where-Object { $_.Name -notin @("vid", "scores.json") } |
         ForEach-Object { Copy-Item $_.FullName (Join-Path $Dest $_.Name) -Recurse -Force -ErrorAction Stop }
-    foreach ($d in "vid\vrae", "vid\countdown", "vid\visual") { New-Item -ItemType Directory -Force (Join-Path $Dest $d) | Out-Null }
+    foreach ($d in "vid\vrae", "vid\countdown", "vid\visual", "vid\dance") { New-Item -ItemType Directory -Force (Join-Path $Dest $d) | Out-Null }
     $scores = Join-Path $Dest "scores.json"
     if (-not (Test-Path $scores)) {
         $z = [ordered]@{}; 1..12 | ForEach-Object { $z["$_"] = 0 }
@@ -191,7 +191,7 @@ function Install-Gameshow {
     Write-Host "Videos tans: $nv vraag-videos, $nc countdown-videos."
     Write-Host ""
     Write-Host "Volgende stappe:"
-    Write-Host "  1. Videos: pak die video-zip uit en kopieer vrae\, countdown\ en visual\"
+    Write-Host "  1. Videos: pak die video-zip uit en kopieer vrae\, countdown\, visual\ en dance\"
     Write-Host "     in die 'Gameshow Videos' vouer op die lessenaar."
     Write-Host "  2. Prop die kabel van die GameShow router in en dubbelklik 'Gameshow Netwerk'."
     Write-Host "  3. Dubbelklik 'Gameshow' om te begin (toegangskode 00000)."

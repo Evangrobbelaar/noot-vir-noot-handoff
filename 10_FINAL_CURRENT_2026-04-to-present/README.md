@@ -52,7 +52,18 @@ vid/
     intro.Q_bridge.mp4   ← .Q_ anywhere: no pauses, plays straight through
   countdown/
     countdown1.mp4
+  dance/                 ← optional: dance videos for the M key
+    1_dance_break.mp4    ← first M press
+    2_cha_cha_slide.mp4  ← second M press
 ```
+
+**Dance videos (key M):** press **M** between questions to play the next video in
+`vid/dance/` (in filename order, each once). It works whenever the show is waiting
+for NEXT with no buttons armed: before the intro, at *Ready to Start*, at a
+question's first pause, or at the end of a question. The dance holds on its last
+frame; **NEXT** then carries on exactly as it would have without the dance
+(NEXT during a dance skips the rest of it). M is ignored while a question is
+running or buttons are armed.
 
 **Play order:** videos in `vrae/` and `countdown/` play **newest "last modified" first**
 (same as the old `gameshow2.py`). Set the order with `sort22.py` (Video Playlist Metadata
@@ -97,8 +108,9 @@ All pause timestamps are configurable live in the **Pause Timing** section of th
 
 ## Window switching
 
-Press the configured `toggle_key` (default: `l`) on the physical clicker to switch the
-display between the gameshow video window and the leaderboard window.
+Press the configured `toggle_key` (default: `l`) to switch the display between the
+gameshow video window and the leaderboard window. **L** and **N** (NEXT) work whichever
+window is in front; **M** (dance) works on the show window or the control panel.
 
 Press `q` to quit all processes.
 
